@@ -46,3 +46,23 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px}
 .portrait__img,.wide-photo img{opacity:0;transition:opacity .6s var(--ease)}
 .portrait__img.ok,.wide-photo img.ok{opacity:1}
 html[data-header=modern] .hd__end .btn,.skip{min-height:44px!important;display:inline-flex;align-items:center}
+
+/* ===== סבב בדיקות התמלול (2026-10-15) ===== */
+/* 4 ריווחים קבועים: חיצוני · פנימי · בין קבוצות · בתוך קבוצה */
+:root{--sp-outer:var(--g);--sp-section:clamp(5rem,10vw,8rem);--sp-group:clamp(1.6rem,3vw,2.6rem);--sp-item:1rem}
+.statement-sec,.calc,.about,.services,.quotes,.faq{padding-block:var(--sp-section)!important}
+.foot{padding-top:var(--sp-section)!important}
+.calc__in,.quotes__head,.about__txt,.build__txt{gap:var(--sp-group)}
+.services .h2{margin:.6rem 0 var(--sp-group)}
+.reassure{flex-basis:100%;margin:0;color:var(--mute);font-size:var(--fs-small)!important}
+.hero__cta{row-gap:.8rem}
+.swipe-hint{display:none;color:var(--mute);font-size:var(--fs-small)!important;margin-bottom:.4rem}
+@media (max-width:860px){.swipe-hint{display:block}}
+.foot__social{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;align-items:center;margin-top:3rem}
+.foot__social a{display:inline-flex;align-items:center;min-height:44px;color:#fff;text-decoration:none;font-size:var(--fs-small)!important;border-bottom:1px solid rgba(255,255,255,.3)}
+.foot__social a:hover{border-color:#fff}
+.foot__social+.foot__bar{margin-top:1rem}
+/* וואטסאפ צף — CTA קבוע גם כשההדר נעלם בגלילה */
+.wa{position:fixed;z-index:40;bottom:1.1rem;inset-inline-end:1.1rem;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#fff;box-shadow:0 10px 24px rgba(24,24,66,.25);transition:transform .4s var(--ease)}
+.wa:hover{transform:translateY(-3px)}
+.wa svg{width:28px;height:28px}

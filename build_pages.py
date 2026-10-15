@@ -37,7 +37,7 @@ def page(fname, title, lead, body, robots=True):
     {body}
   </div>
 </main>
-<footer class="docfoot"><div class="wrap foot__bar"><span>© איציק דייטש</span><span><a href="{BASE}accessibility.html">הצהרת נגישות</a> · <a href="{BASE}privacy.html">מדיניות פרטיות</a> · <a href="{BASE}terms.html">תנאי שימוש</a></span></div></footer>
+<footer class="docfoot"><div class="wrap foot__bar"><span>© איציק דייטש · עיצוב ובנייה: מירי דייטש</span><span><a href="{BASE}accessibility.html">הצהרת נגישות</a> · <a href="{BASE}privacy.html">מדיניות פרטיות</a> · <a href="{BASE}terms.html">תנאי שימוש</a></span></div></footer>
 </body>
 </html>
 '''
