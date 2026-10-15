@@ -1,0 +1,5 @@
+/* פונט נבחר: IBM Plex Sans Hebrew */
+html[data-font=plex]{--f-head:"IBM Plex Sans Hebrew",Arial,sans-serif;--f-body:"IBM Plex Sans Hebrew",Arial,sans-serif;--f-label:"IBM Plex Sans Hebrew",Arial,sans-serif}
+html[data-font=plex] .hero h1,html[data-font=plex] .h2,html[data-font=plex] .statement{font-weight:200}
+html[data-font=plex] :is(.hero h1,.h2,.statement) .acc{font-weight:700}
+html[data-font=plex] .micro{letter-spacing:.02em}
