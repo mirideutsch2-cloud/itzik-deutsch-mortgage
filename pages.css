@@ -1,0 +1,18 @@
+/* עמודי משנה: נגישות, פרטיות, תנאים, 404 */
+body{background:var(--paper)}
+.doc{padding:8rem 0 5rem;min-height:calc(100svh - 80px)}
+.doc__in{display:grid;gap:1.3rem;max-width:760px}
+.doc h1{margin-bottom:.6rem}
+.doc .h3{font:700 var(--fs-2)/1.2 var(--f-head);margin-top:1.4rem}
+.doc p,.doc li{color:var(--ink);line-height:1.6}
+.doc a{color:var(--acc);text-underline-offset:.25em}
+.doc .btn{color:#fff}
+.list{margin:0;padding-inline-start:1.2rem;display:grid;gap:.5rem}
+.list li::marker{color:var(--acc)}
+.list--plain{list-style:none;padding:0}
+.draft{padding:1rem 1.2rem;border-radius:var(--r-s);background:#fff;border:1px solid var(--line);border-inline-start:4px solid var(--acc)}
+.meta{color:var(--mute)!important;font-size:var(--fs-small)!important}
+.nf{width:min(100%,420px);color:var(--ink);margin:1rem 0}
+.docfoot{background:var(--night);color:rgba(255,255,255,.7)}
+.docfoot .foot__bar{margin-top:0;border-top:0}
+.docfoot a{color:#fff}

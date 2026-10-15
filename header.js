@@ -21,7 +21,7 @@
   const spy = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { active = links.find(a => a.getAttribute("href") === "#" + e.target.id) || null; links.forEach(a => a.classList.toggle("on", a === active)); moveInd(active); } }), { rootMargin: "-45% 0px -50% 0px" });
   links.forEach(a => { const t = document.querySelector(a.getAttribute("href")); if (t) spy.observe(t); a.addEventListener("mouseenter", () => moveInd(a)); });
   hd.querySelector(".hd__links").addEventListener("mouseleave", () => moveInd(active));
-  const top = document.getElementById("top"); new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { active = null; links.forEach(a => a.classList.remove("on")); moveInd(null); } }), { threshold: .5 }).observe(top);
+  const top = document.getElementById("top"); if (top) new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { active = null; links.forEach(a => a.classList.remove("on")); moveInd(null); } }), { threshold: .5 }).observe(top);
   function setMenu(open) {
     btn.setAttribute("aria-expanded", open); menu.hidden = !open; root.classList.toggle("menu-open", open);
     btn.querySelector(".hd__menu-t").textContent = open ? "סגירה" : "תפריט";

@@ -1,0 +1,47 @@
+/* ===== מערכת טיפוגרפיה סופית (לפי הסקיל): 5 גדלים + 3 משקלים =====
+   display · fs-1 (כותרת) · fs-2 (תת-כותרת) · body · small   |   200 · 400 · 700
+   (וורדמרק הענק בפוטר הוא גרפיקה דקורטיבית aria-hidden ולא חלק מהסולם) */
+:root{
+  --fs-display:clamp(2.7rem,1.45rem + 4.15vw,5.95rem);
+  --fs-1:clamp(2.1rem,1.4rem + 2.9vw,4rem);
+  --fs-2:clamp(1.3rem,1.08rem + .9vw,1.8rem);
+  --fs-body:clamp(1.0625rem,1rem + .3vw,1.25rem);
+  --fs-small:.9375rem;
+  --w-light:200; --w-reg:400; --w-bold:700;
+}
+html body{font-size:var(--fs-body)!important;font-weight:var(--w-reg)!important}
+/* display */
+.hero h1,.pay,.pay *{font-size:var(--fs-display)!important}
+/* fs-1 */
+.h2,.statement,.statement .w,.svc h3,.trust b,.trust b *,.foot__title,.foot__title *{font-size:var(--fs-1)!important}
+/* fs-2 */
+.doc .h3,.steps h3,summary,.sig,.about__txt .sig,.save b,.menu__links a,.split__legend dd{font-size:var(--fs-2)!important}
+/* body */
+p,.lead,.lead *,.money,blockquote,.q blockquote,.contact a,.rng>span,.rng output,dd,.calc__head p,.about__txt p,.form input,.form select,.steps p,.svc p,details p,.q figcaption b{font-size:var(--fs-body)!important}
+/* small */
+.micro,.tagS,.fine,.trust__note,.trust li>span,small,.brand small,.hd__links a,.hd__phone,.hd__menu,.hd__menu *,.btn,.btn *,.dock a,.facts li,.portrait figcaption,.q figcaption span,.split__legend dt,.save span,.steps .num,.svc .num,.meter span,.form label>span,.foot__bar,.foot__bar *,.menu__links a span,.skip,.brand span,.link{font-size:var(--fs-small)!important}
+.form label{font-size:var(--fs-small)!important}
+/* weights */
+.hero h1,.h2,.statement,.statement .w,.svc h3,.trust b,.trust b *,.pay,.pay *,.sig,.menu__links a,.foot__title{font-weight:var(--w-light)!important}
+.acc,.statement .acc,.statement .acc .w,.hero h1 .acc,.h2 .acc,.foot__title .acc,.svc li:hover h3,.btn,.btn *,.steps h3,summary,.save b,.split__legend dd,.money,.brand span,.q figcaption b,.steps .num,.link,.contact a,.hd__links a.on,.menu__links a:hover{font-weight:var(--w-bold)!important}
+.micro,.tagS,.fine,.trust__note,.hd__links a,.hd__phone,.hd__menu,.hd__menu *,.rng>span,.rng output,.svc .num,.meter span,.form label,.facts li,.dock a,.menu__links a span,.portrait figcaption,.trust li>span,.brand small{font-weight:var(--w-reg)!important}
+.dock .dock__cta{font-weight:var(--w-bold)!important}
+.foot__mega{font-weight:var(--w-bold)!important}
+.pay .s{font-size:1em!important}
+.trust b .s{font-size:1em!important}
+
+/* ===== אזורי לחיצה ≥ 44px ===== */
+.brand,.foot__bar a,.contact a,.hd__phone,.link,.menu__foot a{display:inline-flex;align-items:center;min-height:44px}
+.foot__bar a{padding-inline:.35rem}
+input[type=range]{height:44px}
+input[type=range]::-webkit-slider-thumb{width:30px;height:30px;margin-top:-13px}
+input[type=range]::-moz-range-thumb{width:26px;height:26px}
+.btn{min-height:44px}
+.hd__links a{min-height:44px;display:inline-flex;align-items:center}
+
+/* ===== תמונות (מוצגות אוטומטית כשהקובץ קיים בתיקיית images) ===== */
+.portrait__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;border-radius:inherit}
+.wide-photo{margin:clamp(2.5rem,5vw,4rem) 0 0;border-radius:var(--r);overflow:hidden;aspect-ratio:16/9;background:var(--paper)}
+.wide-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.portrait__img,.wide-photo img{opacity:0;transition:opacity .6s var(--ease)}
+.portrait__img.ok,.wide-photo img.ok{opacity:1}
