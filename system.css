@@ -45,3 +45,4 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px}
 .wide-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .portrait__img,.wide-photo img{opacity:0;transition:opacity .6s var(--ease)}
 .portrait__img.ok,.wide-photo img.ok{opacity:1}
+html[data-header=modern] .hd__end .btn,.skip{min-height:44px!important;display:inline-flex;align-items:center}
