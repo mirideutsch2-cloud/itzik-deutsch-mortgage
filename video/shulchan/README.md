@@ -22,4 +22,4 @@
 
 ## גרסה מלאה
 - 1080×1920, 60fps, 23 שנ'. מיקס: קול -14.6 LUFS, מוזיקה -23.6 (פער 9dB).
-- קישור: https://d2ol7oe51mr4n9.cloudfront.net/user_366ocV6CUJ4ciijgmky5Jcqpr90/251d440a-a511-4800-9948-0445bfb1001a.mp4 (ויזואלים מוגדלים)
+- קישור: https://d2ol7oe51mr4n9.cloudfront.net/user_366ocV6CUJ4ciijgmky5Jcqpr90/28a7ae51-8dd6-41fb-b66d-6766a8b703c0.mp4 (זרימה + הפתעות)

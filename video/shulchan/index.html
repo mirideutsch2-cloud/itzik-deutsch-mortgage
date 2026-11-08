@@ -72,67 +72,122 @@ const TX=378,TY=640,PX=109,PY=195,RW=82,RH=123;
 const SCAN=[[4,-3],[-3,2],[2,4],[-4,-1],[3,1]];
 function roul(){const pts=[];let t=5.55,dt=.3;let k=0;while(t<6.9){pts.push([t,[Math.round((hash(k,3)-.5)*8),Math.round((hash(k,7)-.5)*6)]]);t+=dt;dt*=.82;k++}pts.push([6.92,[0,0]]);return pts}
 const ROUL=roul();
-const LP=172,DSZ=98,DRAD=20;
+const LP=172,DSZ=98,DRAD=20,HC=LP/2;
+const BEAT=60/140;
+const beatEnv=t=>Math.pow(1-((t%BEAT)/BEAT),3);
 const lpos=(i,j)=>[TX+i*LP+(((j%2)+2)%2)*LP/2,TY+j*LP/2];
+const uvpos=(u,v)=>[TX+u*HC,TY+v*HC];
 const TILE=new Path2D();TILE.roundRect(-DSZ/2,-DSZ/2,DSZ,DSZ,DRAD);
-const SCANP=[[3,-5],[-3,4],[1,7],[-4,-2],[2,3]];
-function bracketPos(t){
- if(t<0.12)return lpos(0,0);
- if(t<5.55){const seg=Math.floor(t/1.1),p=eio(lin(t%1.1,0,.55));const a=lpos(...SCANP[seg%5]),b=lpos(...SCANP[(seg+1)%5]);return [mix(a[0],b[0],p),mix(a[1],b[1],p)]}
- let cur=ROUL[0][1];for(const [tt,c] of ROUL)if(t>=tt)cur=c;return lpos(cur[0],cur[1]*2)}
+const BANKP=(()=>{const p=new Path2D();p.moveTo(-26,-8);p.lineTo(0,-24);p.lineTo(26,-8);p.closePath();[-17,-6,6,17].forEach(x=>{p.moveTo(x,-3);p.lineTo(x,15)});p.moveTo(-26,20);p.lineTo(26,20);return p})();
+// 5x7 glyphs
+const GL={'?':['.###.','#...#','....#','...#.','..#..','.....','..#..'],'3':['####.','....#','....#','.###.','....#','....#','####.'],'0':['.###.','#...#','#...#','#...#','#...#','#...#','.###.']};
+function inQ(u,v){const gx=Math.floor((u+7.5)/3),gy=Math.floor((v+10.5)/3);if(gx<0||gx>4||gy<0||gy>6)return false;return GL['?'][gy][gx]=='#'}
+function in30(u,v){const gx=Math.floor((u+16.5)/3),gy=Math.floor((v+10.5)/3);if(gx<0||gx>10||gy<0||gy>6||gx==5)return false;return gx<5?GL['3'][gy][gx]=='#':GL['0'][gy][gx-6]=='#'}
+const BANK_UV=[-6,-4];
+// roulette ring (tiles around centre)
+const RING=[];for(let v=-6;v<=6;v++)for(let u=-6;u<=6;u++){if((u+v)%2)continue;const d=Math.hypot(u,v*1);if(d>3.6&&d<4.7)RING.push([u,v,Math.atan2(v,u)])}RING.sort((a,b)=>a[2]-b[2]);
+const ROUL_T0=5.56,ROUL_T1=6.9;
+function roulIdx(t){const p=eo(lin(t,ROUL_T0,ROUL_T1));const turns=3+5/RING.length;return Math.floor(p*turns*RING.length)%RING.length}
+// camera keyframes for S1
+const CK=[[0,.75,TX+LP*.8,TY+LP*1.0,-6],[.12,.75,TX+LP*.8,TY+LP*1.0,-6],[1.0,.62,TX-LP*1.2,TY-LP*.8,-14],[2.2,.82,TX-6*HC,TY-4*HC,-10],[2.62,.42,TX,TY,-3],[3.25,.45,TX,TY,-2],[3.75,.27,TX,TY,0],[4.45,.28,TX,TY,1],[5.2,.95,TX,TY,-2],[5.5,1.0,TX,TY,-2],[6.95,1.15,TX,TY,-1],[7.45,1.75,TX,TY,0]];
 function camS1(t){
- let s,fx,fy,r;
- if(t<5.5){const p=t/5.5;s=mix(.86,1.04,eio(p));fx=TX+LP*mix(1.3,.4,p);fy=TY+LP*mix(1.6,.5,p);r=mix(-7,-4,p)}
- else if(t<7.0){const p=eio(lin(t,5.5,7.0));s=mix(1.04,1.3,p);fx=TX+LP*mix(.4,0,p);fy=TY+LP*mix(.5,0,p);r=mix(-4,-1,p)}
- else if(t<7.45){const p=eio(lin(t,7.0,7.45));s=mix(1.3,1.75,p);fx=TX;fy=TY;r=mix(-1,0,p)}
- else if(t<7.85){const p=lin(t,7.45,7.85);s=mix(1.75,2.4,eio(p));fx=TX;fy=TY;r=mix(0,7,eio(p))}
- else{const p=lin(t,7.85,8.1);s=emix(2.7,40,ei(p));fx=TX;fy=TY;r=7+p*6}
+ if(t>=7.45){let s,fx=TX,fy=TY,r;
+  if(t<7.85){const p=lin(t,7.45,7.85);s=mix(1.75,2.4,eio(p));r=mix(0,7,eio(p))}
+  else{const p=lin(t,7.85,8.1);s=emix(2.4,40,ei(p));r=7+p*6}
+  return {fx,fy,s,r}}
+ let k=0;while(k<CK.length-2&&t>=CK[k+1][0])k++;
+ const a=CK[k],b=CK[k+1];const p=eio(lin(t,a[0],b[0]));
+ let s=emix(a[1],b[1],p),fx=mix(a[2],b[2],p),fy=mix(a[3],b[3],p),r=mix(a[4],b[4],p);
+ // roulette spin (two full turns, decelerating)
+ r+=-720*eo(lin(t,5.52,7.3));
+ // beat breathing
+ s*=1+beatEnv(t)*.006;
  return {fx,fy,s,r}}
+function tileState(u,v,t){
+ // returns {flip(0..1 extra scaleX factor), col:[r,g,b], icon:null|'bank'|'house'}
+ const h=hash(u*7+3,v*13+1);let g=44+h*24;let col=[g,g,g+12];let sx=1,icon=null;
+ const d=Math.hypot(u,v);
+ // flip wave at start
+ if(t>=.12&&t<1.4){const f=lin(t,.15+d*.018,.15+d*.018+.32);if(f>0&&f<1){sx=Math.abs(Math.cos(f*Math.PI));const lift=Math.sin(f*Math.PI)*40;col=[g+lift,g+lift,g+12+lift]}}
+ // bank tiles
+ const isB=(u==BANK_UV[0]&&v==BANK_UV[1]);
+ const wave=!isB&&h<.13&&d<16&&d>2;
+ const bOn=isB?lin(t,1.0,1.2):wave?lin(t,1.82+d*.012,1.98+d*.012):0;
+ const bOff=lin(t,2.2+d*.01,2.36+d*.01);
+ if(bOn>0&&bOff<1){const ph=bOn<1?bOn:bOff;sx*=Math.abs(Math.cos(ph*Math.PI/2*(bOn<1?1:1)));
+  const show=(bOn>=.5&&bOff<.5);if(show){icon='bank';col=isB?[70,72,150]:[52,54,110]}}
+ // "?"
+ const q=inQ(u,v);const q30=in30(u,v);
+ if(q&&t>=2.28&&t<3.75){const on=lin(t,2.28+(v+10.5)/21*.32,2.36+(v+10.5)/21*.32);const red=lin(t,2.72+d*.01,2.8+d*.01);
+  const off=q30?0:lin(t,3.3+(u+16.5)/33*.4,3.42+(u+16.5)/33*.4);
+  const c=red>0?[mix(233,217,red),mix(234,53,red),mix(246,59,red)]:[233,234,246];
+  const k=on*(1-off);col=[mix(col[0],c[0],k),mix(col[1],c[1],k),mix(col[2],c[2],k)];if(off>0&&off<1)sx*=Math.abs(Math.cos(off*Math.PI))}
+ // "30"
+ if(q30&&t>=3.3&&t<5.2){const st=3.3+(u+16.5)/33*.4;const on=lin(t,st,st+.14);const fl=lin(t,st,st+.2);if(fl>0&&fl<1&&!q)sx*=Math.abs(Math.cos(fl*Math.PI));
+  const prevRed=q?1:0;const c=[233,234,246];
+  const off=lin(t,4.46+(16-d)*.022,4.58+(16-d)*.022);
+  const base=prevRed?[217,53,59]:col;const k=on;let cc=[mix(base[0],c[0],k),mix(base[1],c[1],k),mix(base[2],c[2],k)];
+  if(t>=3.74&&t<3.95){const pl=Math.sin(lin(t,3.74,3.95)*Math.PI)*30;cc=cc.map(x=>x+pl)}
+  if(t>=3.95&&t<4.46){const sw=Math.max(0,Math.sin((u+16.5)/33*Math.PI*1.5-(t-3.95)*9));cc=[mix(cc[0],217,sw*.8),mix(cc[1],53,sw*.8),mix(cc[2],59,sw*.8)]}
+  col=[mix(cc[0],g,off),mix(cc[1],g,off),mix(cc[2],g+12,off)]}
+ // dim the field while the glyphs show / one offer
+ const dim=(t>2.3&&t<5.5)&&!(q&&t<3.5)&&!(q30&&t>3.3&&t<4.6)?.62:1;
+ if(!(u==0&&v==0))col=col.map(x=>x*dim);
+ // the one offer
+ if(u==0&&v==0){const one=lin(t,5.16,5.24);if(one>0&&t<6.95){col=[mix(col[0],245,one),mix(col[1],245,one),mix(col[2],252,one)]}
+  if(t>=5.6&&t<6.9)col=[120,120,140];}
+ // roulette chase
+ if(t>=ROUL_T0&&t<6.92){const ri=roulIdx(t);RING.forEach(([ru,rv],k)=>{if(ru==u&&rv==v){const back=(ri-k+RING.length)%RING.length;const a=back==0?1:back==1?.45:back==2?.2:0;col=[mix(col[0],245,a),mix(col[1],245,a),mix(col[2],252,a)]}})}
+ return {sx,col,icon}}
 function drawS1(t){
  const {fx,fy,s,r}=camS1(t);
- bg();ctx.save();camApply(fx,fy,s,r);
+ bg();ctx.save();camApply(fx,fy,s,r);const camM=ctx.getTransform();
  const photoA=lin(t,7.28,7.48);
  const gridA=1-lin(t,7.08,7.32);
+ const be=beatEnv(t);
  if(gridA>0){
   ctx.globalAlpha=gridA;
-  const span=Math.ceil(1150/(s*LP))+1,spanY=Math.ceil(1150/(s*LP/2))+1;
-  const ci=Math.round((fx-TX)/LP),cj=Math.round((fy-TY)/(LP/2));
-  for(let j=cj-spanY;j<=cj+spanY;j++)for(let i=ci-span;i<=ci+span;i++){
-   if(i==0&&j==0)continue;
-   const h=hash(i,j);const g=Math.round(44+h*24);
-   const pulse=Math.max(0,Math.sin(t*1.6-(i*.35+j*.25)))*7;
-   const [x,y]=lpos(i,j);
-   ctx.setTransform(1,0,0,1,0,0);
-   ctx.fillStyle=`rgb(${g+pulse},${g+pulse},${g+12+pulse})`;
-   const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx+x,-fy+y).rotate(45);
-   ctx.setTransform(m);ctx.fill(TILE);
+  const span=Math.ceil(1150/(s*HC))+2;
+  const cu=Math.round((fx-TX)/HC),cv=Math.round((fy-TY)/HC);
+  for(let v=cv-span;v<=cv+span;v++)for(let u=cu-span;u<=cu+span;u++){
+   if((u+v)%2)continue;if(u==0&&v==0&&t>=6.92)continue;
+   const st=tileState(u,v,t);const [x,y]=uvpos(u,v);
+   ctx.setTransform(camM);ctx.translate(x,y);ctx.scale(st.sx,1);ctx.rotate(45*D);
+   const c=st.col.map(z=>Math.round(Math.min(255,z+be*5)));ctx.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;ctx.fill(TILE);
+   if(st.icon=='bank'){ctx.rotate(-45*D);ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=5;ctx.lineJoin='round';ctx.stroke(BANKP)}
   }
-  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;camApply(fx,fy,s,r);
+  ctx.setTransform(camM);ctx.globalAlpha=1;
  }
- // the chosen one: logo diamond, then morphs into the red roof
- const red=t<0.12?1:lin(t,6.95,7.1);
- const mo=eio(lin(t,7.05,7.35));
- ctx.save();ctx.translate(TX,TY);
- const w=mix(DSZ,RW,mo),hh=mix(DSZ,RH,mo),rr=mix(DRAD,3,mo);
- ctx.rotate(mix(45,0,mo)*D);
- const g0=Math.round(44+hash(0,0)*24);
- ctx.fillStyle=red>0?`rgb(${mix(g0,217,red)},${mix(g0,53,red)},${mix(g0+12,59,red)})`:`rgb(${g0},${g0},${g0+12})`;
- if(red>0){ctx.shadowColor='rgba(217,53,59,.8)';ctx.shadowBlur=40*red*(1-mo)}
- ctx.beginPath();ctx.roundRect(-w/2,-hh/2,w,hh,rr);ctx.fill();ctx.shadowBlur=0;
- if(red>0&&mo<1){ctx.rotate(-mix(45,0,mo)*D);ctx.globalAlpha=red*(1-mo);ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';ctx.scale(mix(.42,.3,mo),mix(.42,.3,mo));ctx.stroke(HPATH);ctx.globalAlpha=1}
- ctx.restore();
+ // the chosen one: red logo diamond, morphs into the roof
+ const red=t<0.12?1:lin(t,6.92,7.05);
+ if(red>0){const mo=eio(lin(t,7.05,7.35));
+  ctx.save();ctx.translate(TX,TY);const pop=t<0.12?1:1+.35*Math.sin(Math.PI*lin(t,6.92,7.15));ctx.scale(pop,pop);
+  const w=mix(DSZ,RW,mo),hh=mix(DSZ,RH,mo),rr=mix(DRAD,3,mo);ctx.rotate(mix(45,0,mo)*D);
+  ctx.fillStyle=`rgb(${mix(245,217,red)},${mix(245,53,red)},${mix(252,59,red)})`;ctx.shadowColor='rgba(217,53,59,.8)';ctx.shadowBlur=50*red*(1-mo);
+  ctx.beginPath();ctx.roundRect(-w/2,-hh/2,w,hh,rr);ctx.fill();ctx.shadowBlur=0;
+  if(mo<1){ctx.rotate(-mix(45,0,mo)*D);ctx.globalAlpha=red*(1-mo);ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';ctx.scale(.42,.42);ctx.stroke(HPATH);ctx.globalAlpha=1}
+  ctx.restore();
+  // shock ring on landing
+  const sr=lin(t,6.92,7.3);if(sr>0&&sr<1){ctx.save();ctx.strokeStyle=`rgba(217,53,59,${1-sr})`;ctx.lineWidth=6/s;ctx.beginPath();ctx.arc(TX,TY,DSZ*(.8+sr*3),0,7);ctx.stroke();ctx.restore()}}
+ // flash ring on the one offer
+ const fr=lin(t,5.16,5.5);if(fr>0&&fr<1){ctx.save();ctx.strokeStyle=`rgba(255,255,255,${1-fr})`;ctx.lineWidth=5/s;ctx.beginPath();ctx.arc(TX,TY,DSZ*(.8+fr*2.5),0,7);ctx.stroke();ctx.restore()}
  if(photoA>0&&IA.complete){ctx.globalAlpha=photoA;ctx.drawImage(IA,0,0);ctx.globalAlpha=1}
  ctx.restore();
- // brackets in screen space
- const [bx,by]=bracketPos(t);
- const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);
- const pt=m.transformPoint(new DOMPoint(bx,by));
- const lock=lin(t,6.92,7.15);const pad=mix(1.5,1.25,eo(lock));
- const bw=mix(DSZ*1.42,RW,mo)*s*pad,bh=mix(DSZ*1.42,RH,mo)*s*pad;const ba=t<0.12?1:(t<7.8?1:1-lin(t,7.8,7.92));
- ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-bw/2,-bh/2,bw,bh,ba,Math.max(3,Math.min(6,s*6)));ctx.restore();
+ // brackets
+ let bp=null,bt=0;
+ if(t<0.12)bp=[0,0];
+ else if(t<1.0){const k=Math.floor((t-.12)/BEAT);bp=[(Math.round((hash(k,5)-.5)*10))*2,(Math.round((hash(k,9)-.5)*8))*2];bt=.12+k*BEAT}
+ else if(t<2.25){bp=BANK_UV;bt=1.0}
+ else if(t>=5.16&&t<5.6){bp=[0,0];bt=5.16}
+ else if(t>=5.6&&t<6.92){const ri=roulIdx(t);bp=[RING[ri][0],RING[ri][1]];bt=t}
+ else if(t>=6.92&&t<7.8){bp=[0,0];bt=6.92}
+ if(bp){const [bx,by]=uvpos(bp[0],bp[1]);const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);const pt=m.transformPoint(new DOMPoint(bx,by));
+  const snap=eo(lin(t,bt,bt+.16));const mo=eio(lin(t,7.05,7.35));const pad=mix(1.9,1.25,snap);
+  const bw=mix(DSZ*1.42,RW,mo)*s*pad,bh=mix(DSZ*1.42,RH,mo)*s*pad;const ba=t<7.8?1:1-lin(t,7.8,7.92);
+  ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-bw/2,-bh/2,bw,bh,ba,Math.max(3,Math.min(6,s*6)));ctx.restore()}
 }
 
-// ============ S3 portrait  (8.55–9.35) + photo B table (9.2–10.45)
+// ============ S3 portrait (8.1–9.0) -> zoom out to table (9.0–10.45)
 const FOLD={x:375,y:981,w:180,h:250};
 function drawPortrait(x,y,w,h){
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
@@ -143,33 +198,32 @@ function drawPortrait(x,y,w,h){
 function drawS3(t){
  bg();
  const FW=760,FH=1040;
- if(t<9.25){
-  // red full -> shrinks to frame revealing portrait
-  const p=eio(lin(t,8.1,8.35));
-  const w=mix(W*1.1,FW,p),h=mix(H*1.1,FH,p);
-  drawPortrait(CX-FW/2,CY-FH/2,FW,FH);
-  // red mask outside frame shrinking, as border
-  const bw=mix(Math.max(W,H),12,p);
-  ctx.save();ctx.fillStyle=RED;ctx.beginPath();const bo=12;ctx.rect(CX-w/2-bo,CY-h/2-bo,w+bo*2,h+bo*2);ctx.rect(CX-FW/2,CY-FH/2,FW,FH);ctx.fill('evenodd');ctx.restore();
-  ctx.fillStyle=RED;ctx.globalAlpha=1-lin(t,8.1,8.25);ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1;
-  brackets(CX-FW/2+205,CY-FH/2+181,302,386,lin(t,8.4,8.5)*(1-lin(t,9.15,9.22)),5);
-  // portrait fades into red folder
-  const f=lin(t,9.12,9.25);if(f>0){ctx.fillStyle=RED;ctx.globalAlpha=f;ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1}
+ if(t<9.0){
+  // red field; a portrait window opens from the centre and keeps spinning out of the zoom
+  const p=eo(lin(t,8.1,8.42));const sc=mix(.05,1,p)*(1+lin(t,8.42,9.0)*.05);const rot=mix(13,0,p)+Math.sin(t*2)*.6;
+  ctx.fillStyle=RED;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(CX,CY);ctx.rotate(rot*D);ctx.scale(sc,sc);
+  drawPortrait(-FW/2,-FH/2,FW,FH);
+  // red outside the frame fades to the dark bg as the frame settles, leaving a red border
+  ctx.restore();
+  const bgA=lin(t,8.3,8.5);if(bgA>0){ctx.save();ctx.globalAlpha=bgA;ctx.translate(CX,CY);ctx.rotate(rot*D);ctx.scale(sc,sc);
+   ctx.beginPath();ctx.rect(-4000,-4000,8000,8000);ctx.rect(-FW/2-14,-FH/2-14,FW+28,FH+28);ctx.fillStyle=BG;ctx.fill('evenodd');ctx.restore()}
+  const lk=eo(lin(t,8.42,8.58));ctx.save();ctx.translate(CX,CY);ctx.rotate(rot*D);ctx.scale(sc,sc);brackets(-FW/2+205-((1-lk)*40),-FH/2+181-((1-lk)*40),302+(1-lk)*80,386+(1-lk)*80,lk,5);ctx.restore();
   return}
- // photo B camera
- let s,fx,fy,r;
- const s0=FW/FOLD.w;
- if(t<9.95){const p=eio(lin(t,9.25,9.95));s=mix(s0,1.75,p);fx=mix(FOLD.x,376,p);fy=mix(FOLD.y,850,p);r=mix(0,-4,p)}
- else{const p=lin(t,9.95,10.45);s=emix(1.75,14,ei(p));fx=mix(376,FOLD.x,eio(p));fy=mix(850,FOLD.y,eio(p));r=mix(-4,0,eio(p))}
- ctx.save();camApply(fx,fy,s,r);ctx.globalAlpha=lin(t,9.25,9.4);if(IB.complete)ctx.drawImage(IB,0,0);ctx.globalAlpha=1;
- // keep folder pure red over the fade
- ctx.fillStyle=RED;ctx.globalAlpha=1-lin(t,9.3,9.45);ctx.fillRect(FOLD.x-FOLD.w/2,FOLD.y-FOLD.h/2,FOLD.w,FOLD.h);ctx.globalAlpha=1;
+ // photo B camera: frame becomes the folder, keep pulling out, then push back in
+ const sc0=(FW/FOLD.w)*1.05;let s,fx,fy,r;
+ if(t<9.7){const p=eio(lin(t,9.0,9.7));s=emix(sc0,1.75,p);fx=mix(FOLD.x,376,p);fy=mix(FOLD.y,850,p);r=mix(0,-5,p)}
+ else if(t<10.0){const p=lin(t,9.7,10.0);s=mix(1.75,1.85,p);fx=376;fy=850;r=mix(-5,-6,p)}
+ else{const p=lin(t,10.0,10.45);s=emix(1.85,14,ei(p));fx=mix(376,FOLD.x,eio(p));fy=mix(850,FOLD.y,eio(p));r=mix(-6,0,eio(p))}
+ ctx.save();camApply(fx,fy,s,r);if(IB.complete)ctx.drawImage(IB,0,0);
+ // the portrait sits on the folder and dissolves into red
+ const pa=1-lin(t,9.28,9.5);if(pa>0){ctx.save();ctx.globalAlpha=pa;ctx.fillStyle=RED;ctx.fillRect(FOLD.x-FOLD.w/2-3,FOLD.y-FOLD.h/2-3,FOLD.w+6,FOLD.h+6);
+  ctx.translate(FOLD.x,FOLD.y);const k=FOLD.w/FW*0.97;ctx.scale(k,k);drawPortrait(-FW/2,-FH/2,FW,FH);ctx.restore()}
  ctx.restore();
  const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);const pt=m.transformPoint(new DOMPoint(FOLD.x,FOLD.y));
- const lk=eo(lin(t,9.39,9.6));const ba=lk*(1-lin(t,10.05,10.2));const pad=mix(1.6,1.18,lk);
+ const lk=eo(lin(t,9.39,9.55));const ba=lk*(1-lin(t,10.1,10.22));const pad=mix(1.8,1.18,lk);
  ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-FOLD.w*s*pad/2,-FOLD.h*s*pad/2,FOLD.w*s*pad,FOLD.h*s*pad,ba,5);ctx.restore();
 }
-
 // ============ S4 route line (10.45–13.35)
 function buildPath(){const pts=[];const seg=(x0,y0,x1,y1,n=20)=>{for(let i=0;i<=n;i++)pts.push([mix(x0,x1,i/n),mix(y0,y1,i/n)])};
  const bez=(p0,p1,p2,p3,n=30)=>{for(let i=0;i<=n;i++){const u=i/n,a=(1-u)**3,b=3*u*(1-u)**2,c=3*u*u*(1-u),d=u**3;pts.push([a*p0[0]+b*p1[0]+c*p2[0]+d*p3[0],a*p0[1]+b*p1[1]+c*p2[1]+d*p3[1]])}};
@@ -259,7 +313,7 @@ function drawS5(t){
  if(doorA>0&&IC.complete){const s=3.3*sc5;ctx.save();ctx.globalAlpha=doorA;camApply(DOOR.x,DOOR.y,s,0);ctx.drawImage(IC,0,0);ctx.restore();
   // shadow of card on door
   ctx.fillStyle='rgba(0,0,0,.35)';ctx.filter='blur(12px)';ctx.fillRect(CX-CW/2*sc5+10,CY-CH/2*sc5+16,CW*sc5,CH*sc5);ctx.filter='none'}
- ctx.save();ctx.translate(CX,CY);ctx.scale(sc5,sc5);ctx.translate(-CW/2,cardTop-CY);
+ ctx.save();ctx.translate(CX,CY);ctx.rotate(mix(-4,2,eio(lin(t,13.62,15.9)))*D);ctx.scale(sc5*(1+beatEnv(t)*.006),sc5*(1+beatEnv(t)*.006));ctx.translate(-CW/2,cardTop-CY);
  // vertical wipe from stripe
  const wp=eo(lin(t,13.66,13.95));ctx.beginPath();ctx.rect(0,STRIPE_Y-STRIPE_Y*wp-28,CW,28+STRIPE_Y*wp+(CH-STRIPE_Y)*wp+28);ctx.clip();
  drawCard(t);ctx.restore();
@@ -307,7 +361,7 @@ function drawS6(t){
  const la=lin(t,19.25,19.45);
  if(la>0&&LOGO.complete){
   // chevrons slide in
-  ctx.save();ctx.globalAlpha=la;const off=(1-eo(lin(t,19.25,19.6)))*90;ctx.drawImage(LOGO,lp.lx+off,lp.ly,560,560*283/502);ctx.restore()}
+  ctx.save();ctx.globalAlpha=la;const off=(1-eo(lin(t,19.25,19.6)))*90;const fp=lin(t,21.9,22.35);const fsx=fp>0&&fp<1?Math.abs(Math.cos(fp*Math.PI)):1;ctx.translate(CX,lp.ly+158);ctx.scale(fsx*(1+beatEnv(t)*.012),1+beatEnv(t)*.012);ctx.drawImage(LOGO,lp.lx-CX+off,-158,560,560*283/502);ctx.restore()}
  if(t>=19.25&&la<1){drawDiamond3D(t,lp.cx,lp.cy,lp.sc,0,2,1,null)}
  const tx=(s,a,y,font,col='#fff')=>{const q=lin(t,a,a+.25);if(q<=0)return;ctx.globalAlpha=q;ctx.fillStyle=col;ctx.font=font;ctx.textAlign='center';ctx.direction='rtl';ctx.fillText(s,CX,y+(1-eo(q))*20);ctx.globalAlpha=1};
  tx('איציק דייטש',19.4,1000,`700 128px ${F}`);
@@ -319,7 +373,9 @@ function drawS6(t){
   const tot=x1-x0;const lim=x1-tot*rp;ctx.moveTo(x1,y);
   ctx.lineTo(Math.max(lim,620),y);if(lim<620){ctx.bezierCurveTo(600,y,600,y-48,575,y-48);if(lim<505){ctx.lineTo(505,y-48);ctx.bezierCurveTo(480,y-48,480,y,460,y);ctx.lineTo(Math.max(lim,x0),y)}}
   ctx.stroke();ctx.restore();
-  const dq=lin(t,20.1,20.25);if(dq>0){ctx.fillStyle=RED;ctx.beginPath();ctx.arc(540,1170-22,9*eo(dq),0,7);ctx.fill()}}
+  const dq=lin(t,20.1,20.25);if(dq>0){ctx.fillStyle=RED;ctx.beginPath();ctx.arc(540,1170-22,9*eo(dq)*(1+beatEnv(t)*.5),0,7);ctx.fill()}
+  const tr=t-20.3;if(tr>0){const ph=(tr/1.6)%1;const x=mix(930,150,eio(ph));const yb=(x>505&&x<575)?-48:(x>=575&&x<620)?-48*(1-eio((x-575)/45)):(x>460&&x<=505)?-48*eio((x-460)/45):0;
+   ctx.save();ctx.fillStyle='#fff';ctx.shadowColor='rgba(255,255,255,.9)';ctx.shadowBlur=14;ctx.globalAlpha=Math.min(1,tr*4)*(1-Math.pow(Math.abs(ph-.5)*2,6));ctx.beginPath();ctx.arc(x,1170+yb,7,0,7);ctx.fill();ctx.restore()}}
  // CTA
  const ca=lin(t,20.25,20.5);if(ca>0){ctx.globalAlpha=ca;ctx.textAlign='center';ctx.direction='rtl';ctx.font=`400 58px ${F}`;
   const parts=[['שלחו ','#fff'],['"שולחן"','#E0393F'],[' בוואטסאפ','#fff']];
@@ -328,9 +384,9 @@ function drawS6(t){
   let x=CX+(w0+w1+w2)/2;ctx.textAlign='right';
   ctx.fillStyle='#fff';ctx.fillText('שלחו ',x,1290);x-=w0;ctx.font=`700 58px ${F}`;ctx.fillStyle='#E0393F';ctx.fillText('"שולחן"',x,1290);x-=w1;ctx.font=`400 58px ${F}`;ctx.fillStyle='#fff';ctx.fillText(' בוואטסאפ',x,1290);
   ctx.globalAlpha=1}
- const pa=lin(t,20.45,20.7);if(pa>0){ctx.save();ctx.globalAlpha=pa;ctx.translate(CX,1425);const s=mix(1.25,1,eo(pa));ctx.scale(s,s);
+ const pa=lin(t,20.45,20.7);if(pa>0){ctx.save();ctx.globalAlpha=pa;ctx.translate(CX,1425);const s=mix(1.25,1,eo(pa))*(1+beatEnv(t)*.02);ctx.scale(s,s);
   ctx.font=`700 110px ${F}`;ctx.direction='ltr';ctx.textAlign='left';const num='053-638-0004';const nw=ctx.measureText(num).width;const tot=nw+122;
-  ctx.save();ctx.translate(-tot/2-6,-94);ctx.scale(3.25,3.25);ctx.fillStyle='#25D366';ctx.fill(WA1);ctx.fillStyle='#fff';ctx.fill(WA2);ctx.restore();
+  const bo=Math.sin(Math.PI*lin(t,21.2,21.5))*-26;ctx.save();ctx.translate(-tot/2-6,-94+bo);ctx.scale(3.25,3.25);ctx.fillStyle='#25D366';ctx.fill(WA1);ctx.fillStyle='#fff';ctx.fill(WA2);ctx.restore();const nb=lin(t,21.32,21.5);if(nb>0){ctx.save();ctx.translate(-tot/2+86,-92+bo);ctx.scale(mix(1.8,1,eo(nb)),mix(1.8,1,eo(nb)));ctx.fillStyle=RED;ctx.beginPath();ctx.arc(0,0,22,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font=`700 30px ${F}`;ctx.textAlign='center';ctx.fillText('1',0,11);ctx.restore();ctx.textAlign='left'}
   ctx.textAlign='left';ctx.font=`700 110px ${F}`;ctx.fillStyle='#fff';ctx.fillText(num,-tot/2+122,0);ctx.restore()}
 }
 
