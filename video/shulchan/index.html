@@ -1,0 +1,307 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{--red:#D9353B;--redd:#B8232A;--navy:#181842;--mute:#8F90CC}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0B0B24}
+body{font-family:'IBM Plex Sans Hebrew',sans-serif;color:#fff;position:relative}
+#bg{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,#1B1B4A 0%,#111134 55%,#0A0A22 100%)}
+#grid{position:absolute;inset:-120px;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(60% 50% at 50% 50%,#000 30%,transparent 100%)}
+#cam{position:absolute;inset:0;perspective:1700px;perspective-origin:500px 1120px;overflow:hidden}
+#world{position:absolute;left:0;top:0;width:1px;height:1px;transform-style:preserve-3d}
+.obj{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.card{position:absolute;border-radius:34px;background:linear-gradient(160deg,#25265E 0%,#18183F 100%);border:1.5px solid rgba(255,255,255,.09);box-shadow:0 70px 120px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2);transform-style:preserve-3d}
+.pop{position:absolute;transform:translateZ(70px)}
+.lbl{font-size:30px;color:rgba(255,255,255,.55)}
+.r{color:var(--red)}
+/* headline */
+#hl{position:absolute;top:250px;right:100px;left:100px;height:420px}
+.ph{position:absolute;inset:0;text-align:right}
+.ln{display:block;white-space:nowrap;line-height:1.08}
+.w{position:relative;display:inline-block;margin-left:.24em}
+.w .o{color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.28)}
+.w .f{position:absolute;right:0;top:0;color:#fff;white-space:nowrap}
+.w.k .f{color:var(--red)}
+.w .ul{position:absolute;right:0;bottom:.02em;height:.07em;background:var(--red);border-radius:4px}
+.w .st{position:absolute;right:-.05em;top:52%;height:.08em;background:var(--red);border-radius:4px}
+/* sprites */
+.sp{position:absolute;left:0;top:0}
+.dm{width:34px;height:34px;border-radius:8px;transform:rotate(45deg)}
+/* misc */
+.row{display:flex;justify-content:space-between;align-items:center;padding:0 46px;height:92px;border-top:1px solid rgba(255,255,255,.07);font-size:34px}
+.row b{font-weight:700;font-size:40px;direction:ltr}
+.btn{position:absolute;border-radius:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.cursor{position:absolute;width:64px;height:64px}
+.tile{position:relative;aspect-ratio:1;border-radius:16px;background:#26275A;border:1px solid rgba(255,255,255,.06)}
+.bub{position:absolute;border-radius:26px;padding:20px 30px;font-size:36px;line-height:1.25;white-space:nowrap}
+.ltr{direction:ltr;unicode-bidi:isolate}
+</style></head><body>
+<div id="bg"></div><div id="grid"></div>
+<div id="cam"><div id="world"></div></div>
+<div id="hl"></div>
+<script>
+// ---------------- helpers
+const $=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild};
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lin=(t,a,b)=>cl((t-a)/(b-a));
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eo=x=>1-Math.pow(1-x,3);
+const eob=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const mix=(a,b,p)=>a+(b-a)*p;
+const BPM=92, BEAT=60/BPM;
+const beat=t=>Math.pow(1-((t%BEAT)/BEAT),4);
+const PHOTO=window.PHOTO||null;
+const world=document.getElementById('world');
+
+// ---------------- karaoke phrases (real VO times)
+const PH=[
+ {a:0,b:3.22,lines:[{s:44,ws:[['בבנק',.2],['יש',.74],['מישהו',1.0],['שדואג',1.44],['לבנק.',1.82]],dim:1},{s:134,ws:[['ומי',2.28],['דואג',2.5],['לכם?',2.72,'k']]}]},
+ {a:3.22,b:5.42,lines:[{s:44,ws:[['משכנתא',3.3],['ל-30',3.74],['שנה,',4.0]],dim:1},{s:118,ws:[['על',4.46],['סמך',4.56]]},{s:118,ws:[['הצעה',4.82],['אחת?',5.16,'k']]}]},
+ {a:5.42,b:7.52,lines:[{s:44,ws:[['זה',5.52],['כמו',5.68]],dim:1},{s:126,ws:[['לסובב',5.84]]},{s:126,ws:[['רולטה',6.18,'k']]},{s:44,ws:[['ולקוות',6.6],['לטוב...',7.04]],dim:1}]},
+ {a:7.52,b:10.52,lines:[{s:44,ws:[['אני',7.65]],dim:1},{s:128,ws:[['איציק',7.81],['דייטש',8.07,'u']]},{s:56,ws:[['יושב',8.71],['בצד',9.01],['שלכם',9.39,'k'],['של',9.81],['השולחן',10.01]]}]},
+ {a:10.52,b:13.4,lines:[{s:118,ws:[['מנתח!',10.68],['מתמקח!',11.38]]},{s:118,ws:[['ומלווה',12.04]]},{s:72,ws:[['עד',12.58],['החתימה!',12.88,'k']]}]},
+ {a:13.4,b:15.98,lines:[{s:72,ws:[['הבנק',13.5],['תמיד',13.82],['מרוויח.',14.08,'s']]},{s:134,ws:[['הפעם,',14.7]]},{s:134,ws:[['גם',15.24,'k'],['אתם.',15.4,'k']]}]},
+ {a:15.98,b:19.45,lines:[{s:44,ws:[['שלחו',16.1],['לי',16.44]],dim:1},{s:134,ws:[['"שולחן"',16.58,'k']]},{s:56,ws:[['בוואטסאפ,',17.2],['ואני',17.74],['חוזר',17.98],['אליכם',18.26],['עוד',18.64],['היום!',18.88]]}]},
+];
+const hl=document.getElementById('hl');
+PH.forEach(p=>{p.el=$('<div class="ph"></div>');hl.appendChild(p.el);p.W=[];
+ p.lines.forEach((L,li)=>{const ln=$(`<div class="ln" style="font-size:${L.s}px;font-weight:${L.s>60?700:400};margin-bottom:${L.s>60?4:14}px"></div>`);
+  if(L.dim)ln.style.opacity=.9;
+  L.ws.forEach(([txt,t,k])=>{const w=$(`<span class="w ${k=='k'?'k':''}"><span class="o">${txt}</span><span class="f">${txt}</span></span>`);
+   let deco=null;if(k=='u'){deco=$('<span class="ul"></span>');w.appendChild(deco)}if(k=='s'){deco=$('<span class="st"></span>');w.appendChild(deco)}
+   ln.appendChild(w);p.W.push({w,f:w.querySelector('.f'),o:w.querySelector('.o'),t,k,deco,small:L.s<60})});
+  p.el.appendChild(ln)})});
+function drawHL(t){
+ PH.forEach((p,i)=>{
+  const vis=t>=p.a-0.001&&t<p.b+0.18;p.el.style.display=vis?'block':'none';if(!vis)return;
+  const inP=i==0?1:eo(lin(t,p.a,p.a+.22)), outP=eio(lin(t,p.b-.04,p.b+.16));
+  p.el.style.opacity=inP*(1-outP);p.el.style.transform=`translateY(${(1-inP)*40-outP*50}px)`;
+  p.W.forEach(W=>{let q=lin(t,W.t-.02,W.t+.13);if(i==0&&t<0.15)q=1;
+   W.f.style.clipPath=`inset(-10% 0 -10% ${(1-q)*100}%)`;
+   if(W.small){W.f.style.color=W.k=='k'?'#D9353B':'rgba(255,255,255,.82)';W.o.style.webkitTextStroke='1.5px rgba(255,255,255,.25)'}
+   const pop=W.k=='k'?1+0.12*Math.sin(Math.PI*lin(t,W.t,W.t+.3)):1;W.w.style.transform=`scale(${pop})`;
+   if(W.deco){const d=W.k=='u'?lin(t,W.t+.25,W.t+.6):lin(t,14.62,14.95);W.deco.style.width=(eo(d)*104)+'%'}
+  })});
+}
+
+// ---------------- world objects
+const OBJ=[];
+function obj(x,y,z,html,opt={}){const e=$(`<div class="obj">${html}</div>`);world.appendChild(e);const o={x,y,z,e,...opt};OBJ.push(o);return o}
+// shot positions (world coords of card centres)
+const P={g:[0,0,0],offer:[1500,-320,-150],wheel:[2950,220,0],prof:[4400,-240,-200],route:[5850,280,0],label:[7300,-120,-150],chat:[8750,220,0],end:[10200,0,0]};
+
+// S1 grid floor
+let gh='<div style="position:absolute;left:-430px;top:-430px;width:860px;height:860px;transform:rotateX(46deg) rotateZ(-8deg);transform-style:preserve-3d"><div id="gg" style="display:grid;grid-template-columns:repeat(9,1fr);gap:12px;width:860px"></div></div>';
+const G=obj(...P.g,gh);
+const gg=G.e.querySelector('#gg');const TILES=[];
+for(let i=0;i<99;i++){const t=$('<div class="tile"></div>');gg.appendChild(t);TILES.push(t)}
+const HOT=49;TILES[HOT].innerHTML='<svg viewBox="-50 -50 100 100" style="position:absolute;inset:0;opacity:0" id="hhouse"><g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M-26 2 L0 -22 L26 2"/><path d="M-17 -5 V24 H17 V-5"/></g></svg>';
+const brk=$('<div style="position:absolute;inset:-26px;border:4px solid #fff;border-radius:6px;clip-path:polygon(0 0,30% 0,30% 8%,8% 8%,8% 30%,0 30%,0 70%,8% 70%,8% 92%,30% 92%,30% 100%,70% 100%,70% 92%,92% 92%,92% 70%,100% 70%,100% 30%,92% 30%,92% 8%,70% 8%,70% 0,100% 0,100% 100%,0 100%)"></div>');TILES[HOT].appendChild(brk);
+
+// S2 offer card
+const OF=obj(...P.offer,`<div class="card" style="left:-380px;top:-330px;width:760px;height:660px;overflow:visible">
+ <div style="display:flex;align-items:center;gap:18px;padding:40px 46px 30px"><div style="width:62px;height:62px;border-radius:16px;background:#3A3B78;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 36 36"><path d="M4 14 L18 5 L32 14 Z M7 16 V28 M14 16 V28 M22 16 V28 M29 16 V28 M4 31 H32" stroke="#C9CAF0" stroke-width="3" fill="none" stroke-linejoin="round"/></svg></div>
+ <div><div style="font-size:40px;font-weight:700">הצעת משכנתא</div><div class="lbl" style="font-size:26px">בנק · מסמך פנימי</div></div></div>
+ <div class="row" id="r1"><span>סכום</span><b>₪1,200,000</b></div>
+ <div class="row" id="r2"><span>תקופה</span><b>30 שנה</b></div>
+ <div class="row" id="r3"><span>החזר חודשי</span><b>₪6,240</b></div>
+ <div class="row" id="r4"><span>הצעות נוספות</span><b style="color:rgba(255,255,255,.35)">—</b></div>
+ <div class="pop" id="ofb" style="left:-60px;top:-50px;background:var(--red);border-radius:22px;padding:16px 30px;font-size:40px;font-weight:700;box-shadow:0 20px 50px rgba(217,53,59,.45)">הצעה 1 מתוך 1</div>
+</div>`);
+
+// S3 wheel
+const SEG=['פריים','קבועה','משתנה','צמודה','פריים','קבועה','משתנה','צמודה'];
+let ws='';SEG.forEach((s,i)=>{const a0=i*45-90,a1=a0+45,R=300,rad=d=>d*Math.PI/180;
+ const p=`M0 0 L${R*Math.cos(rad(a0))} ${R*Math.sin(rad(a0))} A${R} ${R} 0 0 1 ${R*Math.cos(rad(a1))} ${R*Math.sin(rad(a1))} Z`;
+ const am=a0+22.5;ws+=`<path d="${p}" fill="${i==3?'#D9353B':(i%2?'#26275E':'#33347A')}" stroke="#14143A" stroke-width="4"/><text transform="rotate(${am}) translate(185 0) rotate(90)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="34" font-weight="700" font-family="IBM Plex Sans Hebrew">${s}</text>`});
+const WH=obj(...P.wheel,`<div class="card" style="left:-380px;top:-420px;width:760px;height:840px">
+ <svg id="wsvg" width="640" height="640" viewBox="-320 -320 640 640" style="position:absolute;left:60px;top:60px"><g id="wrot">${ws}</g><circle r="60" fill="#14143A" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="30" font-weight="700" font-family="IBM Plex Sans Hebrew">?</text></svg>
+ <svg width="60" height="70" style="position:absolute;left:350px;top:30px" class="pop"><path d="M30 66 L6 8 H54 Z" fill="#fff"/></svg>
+ <div class="btn pop" id="spinb" style="left:230px;top:720px;width:300px;height:84px;background:#fff;color:#181842;font-size:40px">סובבו ←</div>
+ <svg class="cursor pop" id="cur1" viewBox="0 0 64 64"><path d="M14 6 L14 50 L25 39 L33 58 L41 54 L33 36 L48 36 Z" fill="#fff" stroke="#14143A" stroke-width="3" stroke-linejoin="round"/></svg>
+</div>`);
+
+// S4 profile
+const photoHTML=PHOTO?`<img src="${PHOTO}" style="width:100%;height:100%;object-fit:cover;object-position:50% 25%">`:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#3A3B78,#20214F);display:flex;align-items:flex-end;justify-content:center"><svg width="300" height="330" viewBox="0 0 300 330"><circle cx="150" cy="120" r="78" fill="#55578F"/><path d="M20 330 C30 220 90 200 150 200 C210 200 270 220 280 330 Z" fill="#55578F"/></svg></div>`;
+const PR=obj(...P.prof,`<div class="card" style="left:-370px;top:-420px;width:740px;height:840px">
+ <div style="position:absolute;left:40px;top:40px;width:660px;height:520px;border-radius:24px;overflow:hidden">${photoHTML}</div>
+ <div style="position:absolute;right:40px;top:590px;font-size:44px;font-weight:700">איציק דייטש</div>
+ <div class="lbl" style="position:absolute;right:40px;top:650px">יועץ משכנתאות</div>
+ <div id="tbl" style="position:absolute;left:40px;right:40px;top:720px;height:80px;border-radius:40px;background:#14143A;border:1px solid rgba(255,255,255,.08)">
+  <div style="position:absolute;right:34px;top:20px;font-size:30px;font-weight:700">אתם</div><div style="position:absolute;left:34px;top:20px;font-size:30px;color:rgba(255,255,255,.45)">הבנק</div>
+  <div id="chip" style="position:absolute;top:8px;width:150px;height:64px;border-radius:32px;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700">איציק</div>
+ </div>
+ <div class="pop" id="side" style="left:-70px;top:520px;background:#fff;color:#181842;border-radius:22px;padding:16px 26px;font-size:34px;font-weight:700;display:flex;gap:12px;align-items:center;box-shadow:0 20px 40px rgba(0,0,0,.35)"><svg width="36" height="36"><circle cx="18" cy="18" r="18" fill="#D9353B"/><path d="M10 18 L16 24 L27 12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/></svg>בצד שלכם</div>
+</div>`);
+
+// S5 route (no card background — line on dark, like ref)
+const RT=obj(...P.route,`<div style="position:absolute;left:-380px;top:-430px;width:760px;height:860px">
+ <svg width="760" height="860" viewBox="0 0 760 860" style="overflow:visible">
+  <path d="M480 840 V40" stroke="rgba(255,255,255,.22)" stroke-width="5" stroke-dasharray="12 16" fill="none"/>
+  <circle cx="480" cy="40" r="10" fill="rgba(255,255,255,.35)"/>
+  <path id="rp" d="M480 840 V700 C480 650 470 640 420 625 L300 590 C260 578 250 560 250 520 V140 C250 100 270 80 300 70 L330 60" stroke="#D9353B" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <rect x="466" y="686" width="28" height="28" fill="#fff"/>
+  <g id="n1"><circle cx="250" cy="470" r="22" fill="#14143A" stroke="#D9353B" stroke-width="6"/></g>
+  <g id="n2"><circle cx="250" cy="330" r="22" fill="#14143A" stroke="#D9353B" stroke-width="6"/></g>
+  <g id="n3"><circle cx="250" cy="190" r="22" fill="#14143A" stroke="#D9353B" stroke-width="6"/></g>
+  <g id="n4"><circle cx="330" cy="60" r="30" fill="#D9353B"/><path d="M316 60 L326 70 L345 50" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+ </svg>
+ <div class="lbl" style="position:absolute;left:500px;top:20px;white-space:nowrap">הצעת הבנק</div>
+ <div id="t1" style="position:absolute;right:540px;top:440px;font-size:40px;font-weight:700;white-space:nowrap">ניתוח</div>
+ <div id="t2" style="position:absolute;right:540px;top:300px;font-size:40px;font-weight:700;white-space:nowrap">משא ומתן</div>
+ <div id="t3" style="position:absolute;right:540px;top:160px;font-size:40px;font-weight:700;white-space:nowrap">ליווי</div>
+ <div id="t4" style="position:absolute;right:460px;top:28px;font-size:44px;font-weight:700;white-space:nowrap;color:#fff">חתימה</div>
+</div>`);
+
+// S6 label card (white, like a shipping label)
+let bars='';let bx=0;for(let i=0;i<64;i++){const w=[3,5,2,7,3,4][ (i*7)%6 ];bars+=`<rect x="${bx}" y="0" width="${w}" height="90" fill="#181842"/>`;bx+=w+4+(i%3)}
+const LB=obj(...P.label,`<div class="card" style="left:-330px;top:-440px;width:660px;height:880px;background:#F3F4F8;color:#181842;border:none;border-radius:20px">
+ <div style="display:flex;justify-content:space-between;align-items:center;padding:34px 40px 0"><div style="font-size:30px;font-weight:700;letter-spacing:.5px">איציק דייטש</div><div style="font-size:22px;color:#55577A" class="ltr">FILE / 0536</div></div>
+ <div style="padding:30px 40px 0;font-size:24px;color:#55577A">החזר חודשי — הצעת הבנק</div>
+ <div id="old" style="position:relative;padding:0 40px;font-size:150px;font-weight:300;line-height:1.05;letter-spacing:-2px" class="ltr">6,240<div id="olds" style="position:absolute;left:30px;top:52%;height:12px;background:#D9353B;border-radius:6px"></div></div>
+ <div style="padding:10px 40px 0;font-size:24px;color:#55577A">החזר חודשי — אחרי ליווי</div>
+ <div id="new" style="padding:0 40px;font-size:150px;font-weight:700;line-height:1.05;letter-spacing:-2px;color:#181842" class="ltr">5,610</div>
+ <div id="bar" style="margin:26px 40px 0;height:56px;background:#D9353B;border-radius:6px;color:#fff;font-size:28px;font-weight:700;display:flex;align-items:center;padding:0 22px;overflow:hidden;white-space:nowrap">מסלול משופר · ₪630 פחות בכל חודש</div>
+ <svg width="580" height="90" style="margin:34px 40px 0;display:block">${bars}</svg>
+ <div style="padding:14px 40px 0;font-size:20px;color:#8F90A8">* המספרים להמחשה בלבד</div>
+</div>`);
+
+// S7 chat
+const CH=obj(...P.chat,`<div class="card" style="left:-370px;top:-450px;width:740px;height:900px;background:linear-gradient(180deg,#1E1F52,#17173F);overflow:hidden">
+ <div style="height:120px;background:#202A5A;display:flex;align-items:center;gap:20px;padding:0 34px;border-bottom:1px solid rgba(255,255,255,.08)">
+  <div style="width:76px;height:76px;border-radius:50%;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">${PHOTO?`<img src="${PHOTO}" style="width:100%;height:100%;object-fit:cover;object-position:50% 25%">`:'<img src="logo.png" style="width:62px">'}</div>
+  <div><div style="font-size:36px;font-weight:700">איציק דייטש</div><div style="font-size:24px;color:#5FD38D">מחובר/ת</div></div>
+  <svg width="44" height="44" viewBox="0 0 32 32" style="margin-right:auto"><path fill="#25D366" d="M16 3C8.8 3 3 8.6 3 15.6c0 2.5.7 4.8 2 6.8L3.6 29l6.8-1.8c1.8 1 3.9 1.6 6 1.6 7.2 0 13-5.6 13-12.6S23.2 3 16 3z"/><path fill="#fff" d="M12 9.5c-.3-.6-.6-.6-.9-.6h-.8c-.3 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.9c.2.2 2.6 4.1 6.4 5.6 3.2 1.2 3.8 1 4.5.9.7-.1 2.2-.9 2.5-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5l-2.4-1.1c-.3-.1-.6-.2-.8.2-.2.4-.9 1.2-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7l-1.4-2.5z"/></svg>
+ </div>
+ <div id="b1" class="bub" style="left:34px;top:200px;background:#2A2C66;border-bottom-left-radius:6px">היי! איך אפשר לעזור?</div>
+ <div id="b2" class="bub" style="right:34px;top:330px;background:#1F8A55;border-bottom-right-radius:6px;font-weight:700;font-size:44px">שולחן</div>
+ <div id="b3" class="bub" style="left:34px;top:460px;background:#2A2C66;border-bottom-left-radius:6px;display:flex;gap:10px;align-items:center;height:76px"><i class="td"></i><i class="td"></i><i class="td"></i></div>
+ <div id="b4" class="bub" style="left:34px;top:460px;background:#2A2C66;border-bottom-left-radius:6px">קיבלתי!<br>חוזר אליכם עוד היום</div>
+ <div style="position:absolute;left:24px;right:24px;bottom:24px;height:96px;border-radius:48px;background:#101034;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;padding:0 30px;gap:20px">
+  <div id="inp" style="flex:1;font-size:38px;color:#fff;white-space:nowrap;overflow:hidden"></div>
+  <div id="sendb" style="width:72px;height:72px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;margin-left:-10px"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M3 12 L21 3 L14 21 L11 13 Z" fill="#fff" transform="scale(-1,1) translate(-24,0)"/></svg></div>
+ </div>
+ <svg class="cursor pop" id="cur2" viewBox="0 0 64 64"><path d="M14 6 L14 50 L25 39 L33 58 L41 54 L33 36 L48 36 Z" fill="#fff" stroke="#14143A" stroke-width="3" stroke-linejoin="round"/></svg>
+</div>`);
+document.head.appendChild($('<style>.td{display:block;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.7)}</style>'));
+
+// END: extruded logo diamonds + photo circle + phone
+let dl='';
+for(let k=0;k<3;k++){for(let j=14;j>=0;j--){const front=j==0;const c=k==2?(front?'#D9353B':'#7A1C22'):(front?'#2B2C6E':'#101030');
+ dl+=`<div class="ld" data-k="${k}" style="position:absolute;left:${k*70-160}px;top:-90px;width:180px;height:180px;border-radius:34px;background:${c};${front?'border:3px solid rgba(255,255,255,.12);':''}transform:translateZ(${-j*4}px) rotate(45deg)"></div>`}}
+const EN=obj(...P.end,`<div id="logo3d" style="position:absolute;left:0;top:0;transform-style:preserve-3d">${dl}
+ <svg width="120" height="120" viewBox="-60 -60 120 120" style="position:absolute;left:10px;top:-60px;transform:translateZ(2px)"><g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M-32 0 L0 -28 L32 0"/><path d="M-21 -8 V30 H21 V-8"/><path d="M20 -16 V-34"/></g></svg></div>`);
+// 2D end overlay (screen space)
+const END2=$(`<div id="end2" style="position:absolute;inset:0;pointer-events:none">
+ <div id="ering" style="position:absolute;left:250px;top:560px;width:500px;height:500px">
+  <svg width="500" height="500" viewBox="0 0 500 500" style="position:absolute;inset:0"><circle cx="250" cy="250" r="236" fill="none" stroke="#2B2C6E" stroke-width="16"/><g id="arc"><circle cx="250" cy="250" r="236" fill="none" stroke="#D9353B" stroke-width="16" stroke-linecap="round" stroke-dasharray="370 1113"/></g></svg>
+  <div style="position:absolute;left:26px;top:26px;width:448px;height:448px;border-radius:50%;overflow:hidden;background:#20214F">${photoHTML}</div>
+ </div>
+ <div id="epill" style="position:absolute;left:0;width:1000px;top:1100px;display:flex;justify-content:center"><div style="background:#fff;color:#181842;border-radius:40px;padding:14px 40px;font-size:44px;font-weight:700;display:flex;align-items:center;gap:18px"><img src="logo.png" style="height:44px">איציק דייטש · ייעוץ משכנתאות</div></div>
+ <div id="ephone" style="position:absolute;left:0;width:1000px;top:1210px;display:flex;justify-content:center"><div style="border:5px solid #D9353B;border-radius:26px;padding:6px 44px;font-size:96px;font-weight:700;letter-spacing:1px;white-space:nowrap;display:flex;align-items:center;gap:26px" class="ltr"><svg width="86" height="86" viewBox="0 0 32 32"><path fill="#25D366" d="M16 3C8.8 3 3 8.6 3 15.6c0 2.5.7 4.8 2 6.8L3.6 29l6.8-1.8c1.8 1 3.9 1.6 6 1.6 7.2 0 13-5.6 13-12.6S23.2 3 16 3z"/><path fill="#fff" d="M12 9.5c-.3-.6-.6-.6-.9-.6h-.8c-.3 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.9c.2.2 2.6 4.1 6.4 5.6 3.2 1.2 3.8 1 4.5.9.7-.1 2.2-.9 2.5-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5l-2.4-1.1c-.3-.1-.6-.2-.8.2-.2.4-.9 1.2-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7l-1.4-2.5z"/></svg>053-638-0004</div></div>
+ <div id="ecta" style="position:absolute;left:0;width:1000px;top:1400px;text-align:center;font-size:56px;font-weight:700"></div>
+</div>`);
+document.body.appendChild(END2);
+const ectaW=[['שלחו',20.9],['"שולחן"',21.15,'k'],['בוואטסאפ',21.45]];
+const ecta=END2.querySelector('#ecta');const EW=[];
+ectaW.forEach(([s,t,k])=>{const w=$(`<span class="w ${k?'k':''}"><span class="o">${s}</span><span class="f">${s}</span></span>`);ecta.appendChild(w);EW.push({w,f:w.querySelector('.f'),t})});
+
+// sprites (3D floating diamonds / coins / checks)
+const SPR=[];
+for(let i=0;i<26;i++){const r=(n)=>{const x=Math.sin(i*127.1+n*311.7)*43758.5453;return x-Math.floor(x)};
+ const kind=i%4;const sz=20+r(1)*34;
+ const html=kind==0?`<div class="dm" style="width:${sz}px;height:${sz}px;border:3px solid #D9353B"></div>`:kind==1?`<div class="dm" style="width:${sz}px;height:${sz}px;background:rgba(255,255,255,.85)"></div>`:kind==2?`<div style="width:${sz+8}px;height:${sz+8}px;border-radius:50%;background:#D9353B;display:flex;align-items:center;justify-content:center"><svg width="${sz*.7}" height="${sz*.7}" viewBox="0 0 20 20"><path d="M4 10 L8.5 14.5 L16 6" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div>`:`<div class="dm" style="width:${sz}px;height:${sz}px;background:#3A3B88"></div>`;
+ const o=obj(r(2)*10400-200, (r(3)-.5)*1500, -200-r(4)*700, html);o.sprite=true;o.ph=r(5)*6.28;o.sp=.5+r(6);SPR.push(o)}
+
+// ---------------- camera shots
+const SH=[['g',0],['offer',3.22],['wheel',5.42],['prof',7.52],['route',10.52],['label',13.4],['chat',15.98],['end',19.45]];
+function camAt(t){
+ let i=0;for(let k=0;k<SH.length;k++)if(t>=SH[k][1])i=k;
+ const DUR=.3;const cur=P[SH[i][0]];let pos=[...cur];let rz=0;
+ const hold=t-SH[i][1];
+ if(i>0&&hold<DUR){const prev=P[SH[i-1][0]];const p=eio(hold/DUR);pos=prev.map((v,j)=>mix(v,cur[j],p));pos[2]+= -Math.sin(p*Math.PI)*380;rz=Math.sin(p*Math.PI)*-4}
+ // gentle push-in during hold
+ pos[2]+=Math.min(hold,3.5)*45;
+ pos[0]+=Math.sin(t*.7)*10;pos[1]+=Math.cos(t*.6)*8;
+ return {pos,rz};
+}
+
+// ---------------- frame
+function renderFrame(t){
+ drawHL(t);
+ const {pos,rz}=camAt(t);
+ // S1 special: dive into hot tile 2.9–3.22
+ const dive=eio(lin(t,2.85,3.3));
+ world.style.transform=`translate3d(${500-pos[0]}px,${1120-pos[1]}px,${pos[2]+120}px) rotateZ(${rz}deg)`;
+ const bp=beat(t);
+ OBJ.forEach((o,idx)=>{
+  if(o.sprite){const fl=Math.sin(t*o.sp+o.ph)*30;o.e.style.transform=`translate3d(${o.x}px,${o.y+fl}px,${o.z}px) rotateZ(${t*40*o.sp+o.ph*57}deg) rotateY(${t*60*o.sp}deg)`;
+   const dx=Math.abs(o.x-pos[0]);o.e.style.display=dx<1300?'block':'none';
+   // keep sprites out of headline band & phone area: fade if projected into top band
+   o.e.style.opacity=.8;return}
+  const dx=Math.abs(o.x-pos[0]);o.e.style.display=dx<1600?'block':'none';
+  const k=idx;const ry=Math.sin(t*.8+k)*7, rx=6+Math.sin(t*.6+k*2)*3;
+  const sc=1+bp*0.008;
+  o.e.style.transform=`translate3d(${o.x}px,${o.y}px,${o.z}px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${sc})`;
+ });
+ // --- S1 grid
+ const hot=t<0.15?1:lin(t,2.28,2.45);
+ TILES[HOT].style.background=hot>0?`rgb(${mix(38,217,hot)},${mix(39,53,hot)},${mix(90,59,hot)})`:'';
+ TILES[HOT].style.boxShadow=hot>0?`0 0 ${70*hot}px rgba(217,53,59,${.9*hot})`:'';
+ TILES[HOT].style.transform=`translateZ(${hot*30}px) scale(${1+hot*.25})`;
+ brk.style.opacity=hot;brk.style.transform=`scale(${1.6-.6*eo(hot)})`;
+ TILES[HOT].querySelector('#hhouse').style.opacity=hot;
+ TILES.forEach((tl,i)=>{if(i==HOT)return;const row=Math.floor(i/9),col=i%9;const wave=Math.max(0,Math.sin(t*3-row*.5-col*.3));tl.style.transform=`translateZ(${wave*6}px)`;tl.style.opacity=t<0.15?1:.55+.45*cl(1-lin(t,2.3,2.6)*.4)});
+ G.e.style.transform=`translate3d(${G.x}px,${G.y}px,${G.z+dive*1100}px) rotateX(6deg) rotateZ(${-t*1.5}deg)`;G.e.style.opacity=1-lin(t,3.12,3.3);
+ // --- S2 offer
+ const o2=OF.e;['r1','r2','r3','r4'].forEach((id,i)=>{const r=o2.querySelector('#'+id);const ap=eo(lin(t,3.3+i*.12,3.6+i*.12));r.style.opacity=ap;r.style.transform=`translateX(${(1-ap)*-40}px)`;
+  r.style.background=(id=='r2'&&t>4.0&&t<4.9)?'rgba(217,53,59,.18)':'transparent'});
+ const ob=o2.querySelector('#ofb');const obp=lin(t,5.1,5.35);ob.style.opacity=obp;ob.style.transform=`translateZ(90px) scale(${obp>0?mix(1.6,1,eob(obp)):1.6}) rotate(-6deg)`;
+ // --- S3 wheel
+ const w3=WH.e;const spinT=lin(t,5.95,7.35);const ang=-20+eo(spinT)*(1440+202.5)+(t<5.95?Math.sin(t*2)*4:0);
+ w3.querySelector('#wrot').setAttribute('transform',`rotate(${ang})`);
+ const c1=w3.querySelector('#cur1');const cp=eio(lin(t,5.45,5.84));const click=lin(t,5.84,5.98);
+ c1.style.left=mix(620,360,cp)+'px';c1.style.top=mix(880,740,cp)+'px';c1.style.transform=`translateZ(110px) scale(${1-Math.sin(click*Math.PI)*.2})`;c1.style.opacity=t<7.1?1:1-lin(t,7.1,7.3);
+ w3.querySelector('#spinb').style.transform=`translateZ(70px) scale(${1-Math.sin(click*Math.PI)*.08})`;
+ w3.querySelector('#spinb').style.background=click>0&&click<1?'#E8E9F7':'#fff';
+ // --- S4 profile
+ const p4=PR.e;const chip=p4.querySelector('#chip');const cp4=eio(lin(t,9.2,9.6));chip.style.left=mix(8,510,cp4)+'px';
+ const sd=p4.querySelector('#side');const sp4=lin(t,9.5,9.75);sd.style.opacity=sp4;sd.style.transform=`translateZ(100px) scale(${sp4>0?mix(1.5,1,eob(sp4)):1.5})`;
+ // --- S5 route
+ const r5=RT.e;const rp=r5.querySelector('#rp');const L=rp.getTotalLength();rp.style.strokeDasharray=L;
+ const prog=t<10.6?0:t<10.9?lin(t,10.6,10.9)*.28:t<11.38?.28:t<11.6?mix(.28,.48,lin(t,11.38,11.6)):t<12.04?.48:t<12.3?mix(.48,.68,lin(t,12.04,12.3)):t<12.88?.68:mix(.68,1,eo(lin(t,12.88,13.1)));
+ rp.style.strokeDashoffset=L*(1-prog);
+ [['n1','t1',10.68],['n2','t2',11.38],['n3','t3',12.04],['n4','t4',12.88]].forEach(([n,tt,tm])=>{const q=lin(t,tm+.05,tm+.25);const g=r5.querySelector('#'+n);g.style.opacity=q;g.style.transformOrigin='center';g.style.transformBox='fill-box';g.style.transform=`scale(${q>0?mix(1.8,1,eob(q)):0})`;
+  const l=r5.querySelector('#'+tt);l.style.opacity=q;l.style.transform=`translateX(${(1-eo(q))*30}px)`});
+ // --- S6 label
+ const l6=LB.e;l6.querySelector('#olds').style.width=(eo(lin(t,14.6,14.9))*92)+'%';
+ l6.querySelector('#old').style.color=t>14.75?'#A6A7C2':'#181842';
+ const np=lin(t,15.24,15.5);const nw=l6.querySelector('#new');nw.style.opacity=np;nw.style.transform=`translateY(${(1-eo(np))*30}px)`;nw.style.color=np>=1?'#181842':'#D9353B';
+ const bar=l6.querySelector('#bar');bar.style.clipPath=`inset(0 0 0 ${(1-eo(lin(t,15.45,15.8)))*100}%)`;
+ // --- S7 chat
+ const c7=CH.e;const typed='שולחן';const tp=lin(t,16.62,17.05);const n=Math.round(tp*typed.length);
+ c7.querySelector('#inp').innerHTML=(n?typed.slice(0,n):'<span style="color:rgba(255,255,255,.35)">הודעה</span>')+((t>16.4&&t<17.2&&Math.floor(t*4)%2==0)?'<span style="color:#25D366">|</span>':'');
+ if(t>17.22)c7.querySelector('#inp').innerHTML='<span style="color:rgba(255,255,255,.35)">הודעה</span>';
+ const b1p=lin(t,16.0,16.25);const b1=c7.querySelector('#b1');b1.style.opacity=b1p;b1.style.transform=`scale(${mix(.8,1,eob(b1p))})`;
+ const b2p=lin(t,17.22,17.42);const b2=c7.querySelector('#b2');b2.style.opacity=b2p;b2.style.transform=`translateY(${(1-eo(b2p))*60}px) scale(${mix(.7,1,eob(b2p))})`;
+ const b3=c7.querySelector('#b3');b3.style.opacity=(t>17.55&&t<17.98)?1:0;b3.querySelectorAll('.td').forEach((d,i)=>d.style.transform=`translateY(${-Math.max(0,Math.sin(t*12-i))*8}px)`);
+ const b4p=lin(t,17.98,18.2);const b4=c7.querySelector('#b4');b4.style.opacity=b4p;b4.style.transform=`scale(${mix(.8,1,eob(b4p))})`;b4.style.transformOrigin='left top';
+ const c2=c7.querySelector('#cur2');const cp7=eio(lin(t,16.9,17.15));const clk=lin(t,17.15,17.28);c2.style.left=mix(420,40,cp7)+'px';c2.style.top=mix(700,830,cp7)+'px';c2.style.transform=`translateZ(110px) scale(${1-Math.sin(clk*Math.PI)*.2})`;c2.style.opacity=t<16.2?0:t<17.6?1:1-lin(t,17.6,17.8);
+ c7.querySelector('#sendb').style.transform=`scale(${1-Math.sin(clk*Math.PI)*.15})`;
+ // --- END
+ const lg=EN.e.querySelector('#logo3d');const ein=eo(lin(t,19.45,20.2));const eup=eio(lin(t,20.15,20.6));
+ const lrot=mix(-70,0,ein)+Math.sin(t*1.5)*6*(1-eup);
+ lg.style.transform=`translateY(${mix(0,-700,eup)}px) scale(${mix(1,.55,eup)}) rotateY(${lrot}deg) rotateX(${mix(25,8,ein)}deg) scale(${mix(1.6,1,ein)})`;
+ const showEnd=t>=20.35;END2.style.display=t>=20.3?'block':'none';
+ const rg=END2.querySelector('#ering');const rp2=eo(lin(t,20.5,20.9));rg.style.opacity=rp2;rg.style.transform=`scale(${mix(.6,1,eob(rp2))})`;
+ END2.querySelector('#arc').setAttribute('transform',`rotate(${t*90} 250 250)`);
+ const pl=END2.querySelector('#epill');const pp=lin(t,20.6,20.9);pl.style.opacity=pp;pl.style.transform=`translateY(${(1-eo(pp))*30}px)`;
+ const ph=END2.querySelector('#ephone');const php=lin(t,20.75,21.0);ph.style.opacity=php;ph.style.transform=`scale(${php>0?mix(1.5,1,eob(php)):1.5}) rotate(${mix(-6,-2,php)}deg) scale(${1+bp*.015})`;
+ EW.forEach(W=>{const q=lin(t,W.t,W.t+.15);W.f.style.clipPath=`inset(-10% 0 -10% ${(1-q)*100}%)`});
+ ecta.style.opacity=lin(t,20.85,21.0);
+ // fade cards behind end overlay
+ document.getElementById('cam').style.opacity=1;
+}
+window.renderFrame=renderFrame;
+window.ready=document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r})))).then(()=>{renderFrame(0);return true});
+</script></body></html>

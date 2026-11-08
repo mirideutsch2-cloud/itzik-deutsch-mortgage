@@ -1,0 +1,63 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--night:#0E0E2C;--navy:#181842;--red:#D9353B;--redd:#B8232A;--mute:#8F90CC}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden}
+body{background:radial-gradient(120% 80% at 50% 45%,#1B1B4A 0%,#111134 55%,#0A0A22 100%);font-family:'IBM Plex Sans Hebrew',sans-serif;color:#fff;position:relative}
+body:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(70% 60% at 50% 50%,#000 30%,transparent 100%)}
+.v{display:none;position:absolute;inset:0}
+.top{position:absolute;top:290px;right:110px;left:110px;text-align:right}
+.kick{font-size:44px;font-weight:400;color:rgba(255,255,255,.62);letter-spacing:.5px;margin-bottom:22px}
+.big{font-size:128px;font-weight:700;line-height:1.02;letter-spacing:-1px}
+.r{color:var(--red)}
+.sig{position:absolute;top:1590px;right:110px;left:110px;display:flex;align-items:center;gap:22px;font-size:34px;color:rgba(255,255,255,.75)}
+.sig img{height:44px;background:#fff;border-radius:12px;padding:8px 12px;box-sizing:content-box}
+.sig b{font-weight:700;color:#fff}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block}
+/* A */
+.gridwrap{position:absolute;top:720px;left:90px;width:800px;height:780px;perspective:1600px;-webkit-mask-image:radial-gradient(75% 70% at 50% 50%,#000 60%,transparent 100%)}
+.grid{position:absolute;left:0;right:0;top:40px;transform:rotateX(42deg) rotateZ(-6deg);transform-origin:50% 50%;display:grid;grid-template-columns:repeat(9,1fr);gap:10px}
+.t{position:relative;aspect-ratio:1;border-radius:16px;background:#26275A;border:1px solid rgba(255,255,255,.06);transform:rotate(45deg) scale(.68)}
+.t.on{transform:rotate(45deg) scale(.95);z-index:2;background:var(--red);box-shadow:0 0 70px rgba(217,53,59,.9)}
+.t.on:after{content:'';position:absolute;inset:-22px;border:3px solid #fff;border-radius:4px;clip-path:polygon(0 0,28% 0,28% 6%,6% 6%,6% 28%,0 28%,0 72%,6% 72%,6% 94%,28% 94%,28% 100%,72% 100%,72% 94%,94% 94%,94% 72%,100% 72%,100% 28%,94% 28%,94% 6%,72% 6%,72% 0,100% 0,100% 100%,0 100%)}
+.br{position:absolute;width:150px;height:150px}
+.br i{position:absolute;width:30px;height:30px;border:3px solid #fff}
+/* B */
+.dia{position:absolute;top:780px;left:50%;width:560px;height:560px;margin-left:-330px}
+.dia div{position:absolute;inset:0;border-radius:90px;transform:rotate(45deg);border:2px solid rgba(217,53,59,.9)}
+/* C */
+svg{position:absolute;inset:0}
+</style></head><body>
+<!-- A: one among thousands -->
+<section class="v" id="A">
+ <div class="top"><div class="kick">בבנק יש מישהו שדואג לבנק.</div><div class="big">ומי דואג<br><span class="r">לכם?</span></div></div>
+ <div class="gridwrap"><div class="grid" id="g"></div></div>
+ <div class="sig"><img src="logo.png"><span><b>איציק דייטש</b> · ייעוץ משכנתאות</span></div>
+</section>
+<!-- B: outline diamond -->
+<section class="v" id="B">
+ <div class="top"><div class="kick">בבנק יש מישהו שדואג לבנק.</div><div class="big">ומי דואג<br><span class="r">לכם?</span></div></div>
+ <div class="dia" id="d"></div>
+ <svg width="1080" height="1920"><g transform="translate(470,1060)" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M-105 0 L0 -95 L105 0"/><path d="M-70 -20 V105 H70 V-20"/><path d="M60 -60 V-115"/></g></svg>
+ <div class="sig"><img src="logo.png"><span><b>איציק דייטש</b> · ייעוץ משכנתאות</span></div>
+</section>
+<!-- C: route -->
+<section class="v" id="C">
+ <div class="top"><div class="kick">משכנתא לשלושים שנה.</div><div class="big">על סמך<br>הצעה <span class="r">אחת?</span></div></div>
+ <svg width="1080" height="1920">
+  <path d="M470 1540 V1300" stroke="rgba(255,255,255,.25)" stroke-width="4" fill="none"/>
+  <path d="M470 1300 V820" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-dasharray="10 14" fill="none"/>
+  <path d="M470 1300 C470 1240 470 1220 520 1200 L600 1170 C640 1155 640 1130 640 1090 V820" stroke="#D9353B" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <rect x="456" y="1286" width="28" height="28" fill="#fff"/>
+  <circle cx="640" cy="820" r="14" fill="#D9353B"/><circle cx="640" cy="820" r="34" fill="none" stroke="rgba(217,53,59,.5)" stroke-width="3"/>
+  <circle cx="470" cy="820" r="10" fill="rgba(255,255,255,.35)"/>
+ </svg>
+ <div style="position:absolute;top:800px;left:110px;width:330px;text-align:left;font-size:30px;color:rgba(255,255,255,.45)">הצעת הבנק</div><div style="position:absolute;top:800px;left:680px;font-size:32px;font-weight:700">המסלול שלכם</div>
+ <div class="sig"><img src="logo.png"><span><b>איציק דייטש</b> · ייעוץ משכנתאות</span></div>
+</section>
+<script>
+const v=location.hash.slice(1)||'A';document.getElementById(v).style.display='block';
+const g=document.getElementById('g');for(let i=0;i<117;i++){const t=document.createElement('div');t.className='t'+(i==48?' on':'');g.appendChild(t)}
+const d=document.getElementById('d');for(let i=0;i<9;i++){const e=document.createElement('div');e.style.transform=`translate(${i*7}px,${-i*7}px) rotate(45deg)`;e.style.opacity=(1-i/10)*(i==0?1:.55);if(i>0)e.style.borderColor='rgba(143,144,204,.5)';d.appendChild(e)}
+</script></body></html>
