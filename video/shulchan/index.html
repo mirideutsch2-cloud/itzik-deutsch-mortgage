@@ -11,6 +11,7 @@ canvas{position:absolute;inset:0}
 #cap .b{font-weight:700}
 </style></head><body>
 <canvas id="c" width="1080" height="1920"></canvas>
+<script>window.PHOTO=window.PHOTO||'img/itzik.jpg'</script>
 <div id="cap"></div>
 <script>
 const W=1080,H=1920,CX=540,CY=1000;
@@ -84,8 +85,8 @@ function camS1(t){
  if(t<5.5){const p=t/5.5;s=mix(.66,.8,eio(p));fx=TX+LP*mix(1.3,.4,p);fy=TY+LP*mix(1.6,.5,p);r=mix(-7,-4,p)}
  else if(t<7.0){const p=eio(lin(t,5.5,7.0));s=mix(.8,1.1,p);fx=TX+LP*mix(.4,0,p);fy=TY+LP*mix(.5,0,p);r=mix(-4,-1,p)}
  else if(t<7.45){const p=eio(lin(t,7.0,7.45));s=mix(1.1,1.75,p);fx=TX;fy=TY;r=mix(-1,0,p)}
- else if(t<8.22){const p=lin(t,7.45,8.22);s=mix(1.75,2.7,eio(p));fx=TX;fy=TY;r=mix(0,9,eio(p))}
- else{const p=lin(t,8.22,8.55);s=emix(2.7,40,ei(p));fx=TX;fy=TY;r=9+p*6}
+ else if(t<7.85){const p=lin(t,7.45,7.85);s=mix(1.75,2.4,eio(p));fx=TX;fy=TY;r=mix(0,7,eio(p))}
+ else{const p=lin(t,7.85,8.1);s=emix(2.7,40,ei(p));fx=TX;fy=TY;r=7+p*6}
  return {fx,fy,s,r}}
 function drawS1(t){
  const {fx,fy,s,r}=camS1(t);
@@ -127,7 +128,7 @@ function drawS1(t){
  const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);
  const pt=m.transformPoint(new DOMPoint(bx,by));
  const lock=lin(t,6.92,7.15);const pad=mix(1.5,1.25,eo(lock));
- const bw=mix(DSZ*1.42,RW,mo)*s*pad,bh=mix(DSZ*1.42,RH,mo)*s*pad;const ba=t<0.12?1:(t<8.2?1:1-lin(t,8.2,8.35));
+ const bw=mix(DSZ*1.42,RW,mo)*s*pad,bh=mix(DSZ*1.42,RH,mo)*s*pad;const ba=t<0.12?1:(t<7.8?1:1-lin(t,7.8,7.92));
  ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-bw/2,-bh/2,bw,bh,ba,Math.max(3,Math.min(6,s*6)));ctx.restore();
 }
 
@@ -135,7 +136,7 @@ function drawS1(t){
 const FOLD={x:375,y:981,w:180,h:250};
 function drawPortrait(x,y,w,h){
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
- if(IP&&IP.complete&&IP.naturalWidth){const sc=Math.max(w/IP.naturalWidth,h/IP.naturalHeight);const iw=IP.naturalWidth*sc,ih=IP.naturalHeight*sc;ctx.filter='grayscale(1) contrast(1.08) brightness(.95)';ctx.drawImage(IP,x+(w-iw)/2,y+(h-ih)*.25,iw,ih);ctx.filter='none'}
+ if(IP&&IP.complete&&IP.naturalWidth){const sc=Math.max(w/IP.naturalWidth,h/IP.naturalHeight)*1.35;const iw=IP.naturalWidth*sc,ih=IP.naturalHeight*sc;const fx=560*sc,fy=520*sc;ctx.filter='grayscale(1) contrast(1.1) brightness(.97)';ctx.drawImage(IP,x+w/2-fx,y+h*.36-fy,iw,ih);ctx.filter='none'}
  else{const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,'#3A3B60');g.addColorStop(1,'#1E1F3E');ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
   ctx.fillStyle='#5A5C82';ctx.beginPath();ctx.arc(x+w/2,y+h*.38,w*.17,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(x+w/2,y+h*.95,w*.36,h*.3,0,Math.PI,0);ctx.fill()}
  ctx.restore()}
@@ -144,14 +145,14 @@ function drawS3(t){
  const FW=630,FH=875;
  if(t<9.25){
   // red full -> shrinks to frame revealing portrait
-  const p=eio(lin(t,8.55,8.82));
+  const p=eio(lin(t,8.1,8.35));
   const w=mix(W*1.1,FW,p),h=mix(H*1.1,FH,p);
   drawPortrait(CX-FW/2,CY-FH/2,FW,FH);
   // red mask outside frame shrinking, as border
   const bw=mix(Math.max(W,H),12,p);
-  ctx.save();ctx.strokeStyle=RED;ctx.lineWidth=bw*2;ctx.strokeRect(CX-w/2-bw,CY-h/2-bw,w+bw*2,h+bw*2);ctx.restore();
-  ctx.fillStyle=RED;ctx.globalAlpha=1-lin(t,8.55,8.7);ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1;
-  brackets(CX-FW*.32,CY-FH*.36,FW*.64,FH*.42,lin(t,8.85,8.95)*(1-lin(t,9.15,9.22)),5);
+  ctx.save();ctx.fillStyle=RED;ctx.beginPath();const bo=12;ctx.rect(CX-w/2-bo,CY-h/2-bo,w+bo*2,h+bo*2);ctx.rect(CX-FW/2,CY-FH/2,FW,FH);ctx.fill('evenodd');ctx.restore();
+  ctx.fillStyle=RED;ctx.globalAlpha=1-lin(t,8.1,8.25);ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1;
+  brackets(CX-FW/2+170,CY-FH/2+150,250,320,lin(t,8.4,8.5)*(1-lin(t,9.15,9.22)),5);
   // portrait fades into red folder
   const f=lin(t,9.12,9.25);if(f>0){ctx.fillStyle=RED;ctx.globalAlpha=f;ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1}
   return}
@@ -336,7 +337,7 @@ function drawS6(t){
 // ============ frame dispatcher
 function renderFrame(t){
  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.filter='none';ctx.setLineDash([]);
- if(t<8.55)drawS1(t);
+ if(t<8.1)drawS1(t);
  else if(t<10.45)drawS3(t);
  else if(t<13.35)drawS4(t);
  else if(t<16.35)drawS5(t);
