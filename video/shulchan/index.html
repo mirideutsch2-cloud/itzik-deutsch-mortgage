@@ -1,307 +1,333 @@
 <!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-:root{--red:#D9353B;--redd:#B8232A;--navy:#181842;--mute:#8F90CC}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1080px;height:1920px;overflow:hidden;background:#0B0B24}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0A0A1C}
 body{font-family:'IBM Plex Sans Hebrew',sans-serif;color:#fff;position:relative}
-#bg{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,#1B1B4A 0%,#111134 55%,#0A0A22 100%)}
-#grid{position:absolute;inset:-120px;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(60% 50% at 50% 50%,#000 30%,transparent 100%)}
-#cam{position:absolute;inset:0;perspective:1700px;perspective-origin:500px 1120px;overflow:hidden}
-#world{position:absolute;left:0;top:0;width:1px;height:1px;transform-style:preserve-3d}
-.obj{position:absolute;left:0;top:0;transform-style:preserve-3d}
-.card{position:absolute;border-radius:34px;background:linear-gradient(160deg,#25265E 0%,#18183F 100%);border:1.5px solid rgba(255,255,255,.09);box-shadow:0 70px 120px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2);transform-style:preserve-3d}
-.pop{position:absolute;transform:translateZ(70px)}
-.lbl{font-size:30px;color:rgba(255,255,255,.55)}
-.r{color:var(--red)}
-/* headline */
-#hl{position:absolute;top:250px;right:100px;left:100px;height:420px}
-.ph{position:absolute;inset:0;text-align:right}
-.ln{display:block;white-space:nowrap;line-height:1.08}
-.w{position:relative;display:inline-block;margin-left:.24em}
-.w .o{color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.28)}
-.w .f{position:absolute;right:0;top:0;color:#fff;white-space:nowrap}
-.w.k .f{color:var(--red)}
-.w .ul{position:absolute;right:0;bottom:.02em;height:.07em;background:var(--red);border-radius:4px}
-.w .st{position:absolute;right:-.05em;top:52%;height:.08em;background:var(--red);border-radius:4px}
-/* sprites */
-.sp{position:absolute;left:0;top:0}
-.dm{width:34px;height:34px;border-radius:8px;transform:rotate(45deg)}
-/* misc */
-.row{display:flex;justify-content:space-between;align-items:center;padding:0 46px;height:92px;border-top:1px solid rgba(255,255,255,.07);font-size:34px}
-.row b{font-weight:700;font-size:40px;direction:ltr}
-.btn{position:absolute;border-radius:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.cursor{position:absolute;width:64px;height:64px}
-.tile{position:relative;aspect-ratio:1;border-radius:16px;background:#26275A;border:1px solid rgba(255,255,255,.06)}
-.bub{position:absolute;border-radius:26px;padding:20px 30px;font-size:36px;line-height:1.25;white-space:nowrap}
-.ltr{direction:ltr;unicode-bidi:isolate}
+canvas{position:absolute;inset:0}
+#cap{position:absolute;top:290px;right:96px;width:820px;text-align:right;font-size:56px;font-weight:400;line-height:1.25;letter-spacing:.2px}
+#cap .w{display:inline-block;margin-left:.26em;white-space:nowrap}
+#cap .k{color:#E0393F;font-weight:700}
+#cap .b{font-weight:700}
 </style></head><body>
-<div id="bg"></div><div id="grid"></div>
-<div id="cam"><div id="world"></div></div>
-<div id="hl"></div>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div id="cap"></div>
 <script>
-// ---------------- helpers
-const $=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild};
+const W=1080,H=1920,CX=540,CY=1000;
+const RED='#D9353B',BG='#0A0A1C';
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const lin=(t,a,b)=>cl((t-a)/(b-a));
 const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
 const eo=x=>1-Math.pow(1-x,3);
-const eob=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const ei=x=>x*x*x;
 const mix=(a,b,p)=>a+(b-a)*p;
-const BPM=92, BEAT=60/BPM;
-const beat=t=>Math.pow(1-((t%BEAT)/BEAT),4);
-const PHOTO=window.PHOTO||null;
-const world=document.getElementById('world');
+const emix=(a,b,p)=>a*Math.pow(b/a,p); // exponential zoom
+const D=Math.PI/180;
+const hash=(i,j)=>{const x=Math.sin(i*127.1+j*311.7)*43758.5453;return x-Math.floor(x)};
+const F="'IBM Plex Sans Hebrew'";
+function img(src){const i=new Image();i.src=src;return i}
+const IA=img('img/a.jpg'),IB=img('img/b.jpg'),IC=img('img/c.jpg'),LOGO=img('img/logo-light.png');
+const IP=window.PHOTO?img(window.PHOTO):null;
 
-// ---------------- karaoke phrases (real VO times)
-const PH=[
- {a:0,b:3.22,lines:[{s:44,ws:[['בבנק',.2],['יש',.74],['מישהו',1.0],['שדואג',1.44],['לבנק.',1.82]],dim:1},{s:134,ws:[['ומי',2.28],['דואג',2.5],['לכם?',2.72,'k']]}]},
- {a:3.22,b:5.42,lines:[{s:44,ws:[['משכנתא',3.3],['ל-30',3.74],['שנה,',4.0]],dim:1},{s:118,ws:[['על',4.46],['סמך',4.56]]},{s:118,ws:[['הצעה',4.82],['אחת?',5.16,'k']]}]},
- {a:5.42,b:7.52,lines:[{s:44,ws:[['זה',5.52],['כמו',5.68]],dim:1},{s:126,ws:[['לסובב',5.84]]},{s:126,ws:[['רולטה',6.18,'k']]},{s:44,ws:[['ולקוות',6.6],['לטוב...',7.04]],dim:1}]},
- {a:7.52,b:10.52,lines:[{s:44,ws:[['אני',7.65]],dim:1},{s:128,ws:[['איציק',7.81],['דייטש',8.07,'u']]},{s:56,ws:[['יושב',8.71],['בצד',9.01],['שלכם',9.39,'k'],['של',9.81],['השולחן',10.01]]}]},
- {a:10.52,b:13.4,lines:[{s:118,ws:[['מנתח!',10.68],['מתמקח!',11.38]]},{s:118,ws:[['ומלווה',12.04]]},{s:72,ws:[['עד',12.58],['החתימה!',12.88,'k']]}]},
- {a:13.4,b:15.98,lines:[{s:72,ws:[['הבנק',13.5],['תמיד',13.82],['מרוויח.',14.08,'s']]},{s:134,ws:[['הפעם,',14.7]]},{s:134,ws:[['גם',15.24,'k'],['אתם.',15.4,'k']]}]},
- {a:15.98,b:19.45,lines:[{s:44,ws:[['שלחו',16.1],['לי',16.44]],dim:1},{s:134,ws:[['"שולחן"',16.58,'k']]},{s:56,ws:[['בוואטסאפ,',17.2],['ואני',17.74],['חוזר',17.98],['אליכם',18.26],['עוד',18.64],['היום!',18.88]]}]},
+// ============ captions (DOM, word-timed, no exclamation marks)
+const CAPS=[
+ {a:.2,b:2.2,ws:[['בבנק',.2],['יש',.74],['מישהו',1.0],['שדואג',1.44],['לבנק.',1.82]]},
+ {a:2.24,b:3.22,ws:[['ומי',2.28],['דואג',2.5],['לכם?',2.72,'k']]},
+ {a:3.28,b:5.46,ws:[['משכנתא',3.3],['ל-30',3.74],['שנה,',4.0],['על',4.46],['סמך',4.56],['הצעה',4.82],['אחת?',5.16,'k']]},
+ {a:5.5,b:7.5,ws:[['זה',5.52],['כמו',5.68],['לסובב',5.84],['רולטה',6.18,'k'],['ולקוות',6.6],['לטוב.',7.04]]},
+ {a:7.6,b:8.62,ws:[['אני',7.65],['איציק',7.81,'b'],['דייטש.',8.07,'b']]},
+ {a:8.66,b:10.5,ws:[['יושב',8.71],['בצד',9.01],['שלכם',9.39,'k'],['של',9.81],['השולחן.',10.01]]},
+ {a:10.62,b:11.34,ws:[['מנתח.',10.68]]},
+ {a:11.34,b:12.0,ws:[['מתמקח.',11.38]]},
+ {a:12.0,b:13.4,ws:[['ומלווה',12.04],['עד',12.58],['החתימה.',12.88,'k']]},
+ {a:13.45,b:14.66,ws:[['הבנק',13.5],['תמיד',13.82],['מרוויח.',14.08]]},
+ {a:14.66,b:16.0,ws:[['הפעם,',14.7],['גם',15.24,'k'],['אתם.',15.4,'k']]},
+ {a:16.05,b:17.7,ws:[['שלחו',16.1],['לי',16.44],['"שולחן"',16.58,'k'],['בוואטסאפ',17.2]]},
+ {a:17.7,b:18.95,ws:[['ואני',17.74],['חוזר',17.98],['אליכם',18.26],['עוד',18.64],['היום.',18.88]]},
 ];
-const hl=document.getElementById('hl');
-PH.forEach(p=>{p.el=$('<div class="ph"></div>');hl.appendChild(p.el);p.W=[];
- p.lines.forEach((L,li)=>{const ln=$(`<div class="ln" style="font-size:${L.s}px;font-weight:${L.s>60?700:400};margin-bottom:${L.s>60?4:14}px"></div>`);
-  if(L.dim)ln.style.opacity=.9;
-  L.ws.forEach(([txt,t,k])=>{const w=$(`<span class="w ${k=='k'?'k':''}"><span class="o">${txt}</span><span class="f">${txt}</span></span>`);
-   let deco=null;if(k=='u'){deco=$('<span class="ul"></span>');w.appendChild(deco)}if(k=='s'){deco=$('<span class="st"></span>');w.appendChild(deco)}
-   ln.appendChild(w);p.W.push({w,f:w.querySelector('.f'),o:w.querySelector('.o'),t,k,deco,small:L.s<60})});
-  p.el.appendChild(ln)})});
-function drawHL(t){
- PH.forEach((p,i)=>{
-  const vis=t>=p.a-0.001&&t<p.b+0.18;p.el.style.display=vis?'block':'none';if(!vis)return;
-  const inP=i==0?1:eo(lin(t,p.a,p.a+.22)), outP=eio(lin(t,p.b-.04,p.b+.16));
-  p.el.style.opacity=inP*(1-outP);p.el.style.transform=`translateY(${(1-inP)*40-outP*50}px)`;
-  p.W.forEach(W=>{let q=lin(t,W.t-.02,W.t+.13);if(i==0&&t<0.15)q=1;
-   W.f.style.clipPath=`inset(-10% 0 -10% ${(1-q)*100}%)`;
-   if(W.small){W.f.style.color=W.k=='k'?'#D9353B':'rgba(255,255,255,.82)';W.o.style.webkitTextStroke='1.5px rgba(255,255,255,.25)'}
-   const pop=W.k=='k'?1+0.12*Math.sin(Math.PI*lin(t,W.t,W.t+.3)):1;W.w.style.transform=`scale(${pop})`;
-   if(W.deco){const d=W.k=='u'?lin(t,W.t+.25,W.t+.6):lin(t,14.62,14.95);W.deco.style.width=(eo(d)*104)+'%'}
-  })});
+const capEl=document.getElementById('cap');
+CAPS.forEach(c=>{c.el=document.createElement('div');c.el.style.position='absolute';c.el.style.right='0';c.el.style.top='0';c.el.style.width='820px';
+ c.W=c.ws.map(([s,t,k])=>{const sp=document.createElement('span');sp.className='w'+(k?' '+k:'');sp.textContent=s;c.el.appendChild(sp);return {sp,t}});capEl.appendChild(c.el)});
+const COVER=document.createElement('div');COVER.innerHTML='<div style="font-size:46px;color:rgba(255,255,255,.7);margin-bottom:16px">בבנק יש מישהו שדואג לבנק.</div><div style="font-size:132px;font-weight:700;line-height:1.02">ומי דואג<br><span style="color:#E0393F">לכם?</span></div>';
+COVER.style.cssText='position:absolute;right:0;top:0;width:820px';capEl.appendChild(COVER);
+function drawCaps(t){
+ const cover=t<0.12;COVER.style.display=cover?'block':'none';
+ CAPS.forEach(c=>{const on=!cover&&t>=c.a-0.05&&t<c.b;c.el.style.display=on?'block':'none';if(!on)return;
+  const out=lin(t,c.b-.1,c.b);c.el.style.opacity=1-out;
+  c.W.forEach(w=>{const q=eo(lin(t,w.t-.03,w.t+.14));w.sp.style.opacity=q;w.sp.style.transform=`translateY(${(1-q)*14}px)`});});
 }
 
-// ---------------- world objects
-const OBJ=[];
-function obj(x,y,z,html,opt={}){const e=$(`<div class="obj">${html}</div>`);world.appendChild(e);const o={x,y,z,e,...opt};OBJ.push(o);return o}
-// shot positions (world coords of card centres)
-const P={g:[0,0,0],offer:[1500,-320,-150],wheel:[2950,220,0],prof:[4400,-240,-200],route:[5850,280,0],label:[7300,-120,-150],chat:[8750,220,0],end:[10200,0,0]};
+// ============ generic helpers
+function brackets(x,y,w,h,a=1,lw=5){if(a<=0)return;ctx.save();ctx.globalAlpha=a;ctx.strokeStyle='#fff';ctx.lineWidth=lw;ctx.lineCap='square';
+ const L=Math.min(w,h)*.24;
+ [[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]].forEach(([px,py,sx,sy])=>{ctx.beginPath();ctx.moveTo(px,py+sy*L);ctx.lineTo(px,py);ctx.lineTo(px+sx*L,py);ctx.stroke()});ctx.restore()}
+function bg(){ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(CX,CY,100,CX,CY,1200);g.addColorStop(0,'rgba(40,40,100,.35)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}
+// photo-space camera: point (fx,fy) of a photo lands on screen (CX,CY) at scale s, rotation r
+function camApply(fx,fy,s,r){ctx.translate(CX,CY);ctx.rotate(r*D);ctx.scale(s,s);ctx.translate(-fx,-fy)}
 
-// S1 grid floor
-let gh='<div style="position:absolute;left:-430px;top:-430px;width:860px;height:860px;transform:rotateX(46deg) rotateZ(-8deg);transform-style:preserve-3d"><div id="gg" style="display:grid;grid-template-columns:repeat(9,1fr);gap:12px;width:860px"></div></div>';
-const G=obj(...P.g,gh);
-const gg=G.e.querySelector('#gg');const TILES=[];
-for(let i=0;i<99;i++){const t=$('<div class="tile"></div>');gg.appendChild(t);TILES.push(t)}
-const HOT=49;TILES[HOT].innerHTML='<svg viewBox="-50 -50 100 100" style="position:absolute;inset:0;opacity:0" id="hhouse"><g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M-26 2 L0 -22 L26 2"/><path d="M-17 -5 V24 H17 V-5"/></g></svg>';
-const brk=$('<div style="position:absolute;inset:-26px;border:4px solid #fff;border-radius:6px;clip-path:polygon(0 0,30% 0,30% 8%,8% 8%,8% 30%,0 30%,0 70%,8% 70%,8% 92%,30% 92%,30% 100%,70% 100%,70% 92%,92% 92%,92% 70%,100% 70%,100% 30%,92% 30%,92% 8%,70% 8%,70% 0,100% 0,100% 100%,0 100%)"></div>');TILES[HOT].appendChild(brk);
-
-// S2 offer card
-const OF=obj(...P.offer,`<div class="card" style="left:-380px;top:-330px;width:760px;height:660px;overflow:visible">
- <div style="display:flex;align-items:center;gap:18px;padding:40px 46px 30px"><div style="width:62px;height:62px;border-radius:16px;background:#3A3B78;display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 36 36"><path d="M4 14 L18 5 L32 14 Z M7 16 V28 M14 16 V28 M22 16 V28 M29 16 V28 M4 31 H32" stroke="#C9CAF0" stroke-width="3" fill="none" stroke-linejoin="round"/></svg></div>
- <div><div style="font-size:40px;font-weight:700">הצעת משכנתא</div><div class="lbl" style="font-size:26px">בנק · מסמך פנימי</div></div></div>
- <div class="row" id="r1"><span>סכום</span><b>₪1,200,000</b></div>
- <div class="row" id="r2"><span>תקופה</span><b>30 שנה</b></div>
- <div class="row" id="r3"><span>החזר חודשי</span><b>₪6,240</b></div>
- <div class="row" id="r4"><span>הצעות נוספות</span><b style="color:rgba(255,255,255,.35)">—</b></div>
- <div class="pop" id="ofb" style="left:-60px;top:-50px;background:var(--red);border-radius:22px;padding:16px 30px;font-size:40px;font-weight:700;box-shadow:0 20px 50px rgba(217,53,59,.45)">הצעה 1 מתוך 1</div>
-</div>`);
-
-// S3 wheel
-const SEG=['פריים','קבועה','משתנה','צמודה','פריים','קבועה','משתנה','צמודה'];
-let ws='';SEG.forEach((s,i)=>{const a0=i*45-90,a1=a0+45,R=300,rad=d=>d*Math.PI/180;
- const p=`M0 0 L${R*Math.cos(rad(a0))} ${R*Math.sin(rad(a0))} A${R} ${R} 0 0 1 ${R*Math.cos(rad(a1))} ${R*Math.sin(rad(a1))} Z`;
- const am=a0+22.5;ws+=`<path d="${p}" fill="${i==3?'#D9353B':(i%2?'#26275E':'#33347A')}" stroke="#14143A" stroke-width="4"/><text transform="rotate(${am}) translate(185 0) rotate(90)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="34" font-weight="700" font-family="IBM Plex Sans Hebrew">${s}</text>`});
-const WH=obj(...P.wheel,`<div class="card" style="left:-380px;top:-420px;width:760px;height:840px">
- <svg id="wsvg" width="640" height="640" viewBox="-320 -320 640 640" style="position:absolute;left:60px;top:60px"><g id="wrot">${ws}</g><circle r="60" fill="#14143A" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="30" font-weight="700" font-family="IBM Plex Sans Hebrew">?</text></svg>
- <svg width="60" height="70" style="position:absolute;left:350px;top:30px" class="pop"><path d="M30 66 L6 8 H54 Z" fill="#fff"/></svg>
- <div class="btn pop" id="spinb" style="left:230px;top:720px;width:300px;height:84px;background:#fff;color:#181842;font-size:40px">סובבו ←</div>
- <svg class="cursor pop" id="cur1" viewBox="0 0 64 64"><path d="M14 6 L14 50 L25 39 L33 58 L41 54 L33 36 L48 36 Z" fill="#fff" stroke="#14143A" stroke-width="3" stroke-linejoin="round"/></svg>
-</div>`);
-
-// S4 profile
-const photoHTML=PHOTO?`<img src="${PHOTO}" style="width:100%;height:100%;object-fit:cover;object-position:50% 25%">`:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#3A3B78,#20214F);display:flex;align-items:flex-end;justify-content:center"><svg width="300" height="330" viewBox="0 0 300 330"><circle cx="150" cy="120" r="78" fill="#55578F"/><path d="M20 330 C30 220 90 200 150 200 C210 200 270 220 280 330 Z" fill="#55578F"/></svg></div>`;
-const PR=obj(...P.prof,`<div class="card" style="left:-370px;top:-420px;width:740px;height:840px">
- <div style="position:absolute;left:40px;top:40px;width:660px;height:520px;border-radius:24px;overflow:hidden">${photoHTML}</div>
- <div style="position:absolute;right:40px;top:590px;font-size:44px;font-weight:700">איציק דייטש</div>
- <div class="lbl" style="position:absolute;right:40px;top:650px">יועץ משכנתאות</div>
- <div id="tbl" style="position:absolute;left:40px;right:40px;top:720px;height:80px;border-radius:40px;background:#14143A;border:1px solid rgba(255,255,255,.08)">
-  <div style="position:absolute;right:34px;top:20px;font-size:30px;font-weight:700">אתם</div><div style="position:absolute;left:34px;top:20px;font-size:30px;color:rgba(255,255,255,.45)">הבנק</div>
-  <div id="chip" style="position:absolute;top:8px;width:150px;height:64px;border-radius:32px;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700">איציק</div>
- </div>
- <div class="pop" id="side" style="left:-70px;top:520px;background:#fff;color:#181842;border-radius:22px;padding:16px 26px;font-size:34px;font-weight:700;display:flex;gap:12px;align-items:center;box-shadow:0 20px 40px rgba(0,0,0,.35)"><svg width="36" height="36"><circle cx="18" cy="18" r="18" fill="#D9353B"/><path d="M10 18 L16 24 L27 12" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/></svg>בצד שלכם</div>
-</div>`);
-
-// S5 route (no card background — line on dark, like ref)
-const RT=obj(...P.route,`<div style="position:absolute;left:-380px;top:-430px;width:760px;height:860px">
- <svg width="760" height="860" viewBox="0 0 760 860" style="overflow:visible">
-  <path d="M480 840 V40" stroke="rgba(255,255,255,.22)" stroke-width="5" stroke-dasharray="12 16" fill="none"/>
-  <circle cx="480" cy="40" r="10" fill="rgba(255,255,255,.35)"/>
-  <path id="rp" d="M480 840 V700 C480 650 470 640 420 625 L300 590 C260 578 250 560 250 520 V140 C250 100 270 80 300 70 L330 60" stroke="#D9353B" stroke-width="12" fill="none" stroke-linecap="round"/>
-  <rect x="466" y="686" width="28" height="28" fill="#fff"/>
-  <g id="n1"><circle cx="250" cy="470" r="22" fill="#14143A" stroke="#D9353B" stroke-width="6"/></g>
-  <g id="n2"><circle cx="250" cy="330" r="22" fill="#14143A" stroke="#D9353B" stroke-width="6"/></g>
-  <g id="n3"><circle cx="250" cy="190" r="22" fill="#14143A" stroke="#D9353B" stroke-width="6"/></g>
-  <g id="n4"><circle cx="330" cy="60" r="30" fill="#D9353B"/><path d="M316 60 L326 70 L345 50" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></g>
- </svg>
- <div class="lbl" style="position:absolute;left:500px;top:20px;white-space:nowrap">הצעת הבנק</div>
- <div id="t1" style="position:absolute;right:540px;top:440px;font-size:40px;font-weight:700;white-space:nowrap">ניתוח</div>
- <div id="t2" style="position:absolute;right:540px;top:300px;font-size:40px;font-weight:700;white-space:nowrap">משא ומתן</div>
- <div id="t3" style="position:absolute;right:540px;top:160px;font-size:40px;font-weight:700;white-space:nowrap">ליווי</div>
- <div id="t4" style="position:absolute;right:460px;top:28px;font-size:44px;font-weight:700;white-space:nowrap;color:#fff">חתימה</div>
-</div>`);
-
-// S6 label card (white, like a shipping label)
-let bars='';let bx=0;for(let i=0;i<64;i++){const w=[3,5,2,7,3,4][ (i*7)%6 ];bars+=`<rect x="${bx}" y="0" width="${w}" height="90" fill="#181842"/>`;bx+=w+4+(i%3)}
-const LB=obj(...P.label,`<div class="card" style="left:-330px;top:-440px;width:660px;height:880px;background:#F3F4F8;color:#181842;border:none;border-radius:20px">
- <div style="display:flex;justify-content:space-between;align-items:center;padding:34px 40px 0"><div style="font-size:30px;font-weight:700;letter-spacing:.5px">איציק דייטש</div><div style="font-size:22px;color:#55577A" class="ltr">FILE / 0536</div></div>
- <div style="padding:30px 40px 0;font-size:24px;color:#55577A">החזר חודשי — הצעת הבנק</div>
- <div id="old" style="position:relative;padding:0 40px;font-size:150px;font-weight:300;line-height:1.05;letter-spacing:-2px" class="ltr">6,240<div id="olds" style="position:absolute;left:30px;top:52%;height:12px;background:#D9353B;border-radius:6px"></div></div>
- <div style="padding:10px 40px 0;font-size:24px;color:#55577A">החזר חודשי — אחרי ליווי</div>
- <div id="new" style="padding:0 40px;font-size:150px;font-weight:700;line-height:1.05;letter-spacing:-2px;color:#181842" class="ltr">5,610</div>
- <div id="bar" style="margin:26px 40px 0;height:56px;background:#D9353B;border-radius:6px;color:#fff;font-size:28px;font-weight:700;display:flex;align-items:center;padding:0 22px;overflow:hidden;white-space:nowrap">מסלול משופר · ₪630 פחות בכל חודש</div>
- <svg width="580" height="90" style="margin:34px 40px 0;display:block">${bars}</svg>
- <div style="padding:14px 40px 0;font-size:20px;color:#8F90A8">* המספרים להמחשה בלבד</div>
-</div>`);
-
-// S7 chat
-const CH=obj(...P.chat,`<div class="card" style="left:-370px;top:-450px;width:740px;height:900px;background:linear-gradient(180deg,#1E1F52,#17173F);overflow:hidden">
- <div style="height:120px;background:#202A5A;display:flex;align-items:center;gap:20px;padding:0 34px;border-bottom:1px solid rgba(255,255,255,.08)">
-  <div style="width:76px;height:76px;border-radius:50%;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">${PHOTO?`<img src="${PHOTO}" style="width:100%;height:100%;object-fit:cover;object-position:50% 25%">`:'<img src="logo.png" style="width:62px">'}</div>
-  <div><div style="font-size:36px;font-weight:700">איציק דייטש</div><div style="font-size:24px;color:#5FD38D">מחובר/ת</div></div>
-  <svg width="44" height="44" viewBox="0 0 32 32" style="margin-right:auto"><path fill="#25D366" d="M16 3C8.8 3 3 8.6 3 15.6c0 2.5.7 4.8 2 6.8L3.6 29l6.8-1.8c1.8 1 3.9 1.6 6 1.6 7.2 0 13-5.6 13-12.6S23.2 3 16 3z"/><path fill="#fff" d="M12 9.5c-.3-.6-.6-.6-.9-.6h-.8c-.3 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.9c.2.2 2.6 4.1 6.4 5.6 3.2 1.2 3.8 1 4.5.9.7-.1 2.2-.9 2.5-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5l-2.4-1.1c-.3-.1-.6-.2-.8.2-.2.4-.9 1.2-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7l-1.4-2.5z"/></svg>
- </div>
- <div id="b1" class="bub" style="left:34px;top:200px;background:#2A2C66;border-bottom-left-radius:6px">היי! איך אפשר לעזור?</div>
- <div id="b2" class="bub" style="right:34px;top:330px;background:#1F8A55;border-bottom-right-radius:6px;font-weight:700;font-size:44px">שולחן</div>
- <div id="b3" class="bub" style="left:34px;top:460px;background:#2A2C66;border-bottom-left-radius:6px;display:flex;gap:10px;align-items:center;height:76px"><i class="td"></i><i class="td"></i><i class="td"></i></div>
- <div id="b4" class="bub" style="left:34px;top:460px;background:#2A2C66;border-bottom-left-radius:6px">קיבלתי!<br>חוזר אליכם עוד היום</div>
- <div style="position:absolute;left:24px;right:24px;bottom:24px;height:96px;border-radius:48px;background:#101034;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;padding:0 30px;gap:20px">
-  <div id="inp" style="flex:1;font-size:38px;color:#fff;white-space:nowrap;overflow:hidden"></div>
-  <div id="sendb" style="width:72px;height:72px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;margin-left:-10px"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M3 12 L21 3 L14 21 L11 13 Z" fill="#fff" transform="scale(-1,1) translate(-24,0)"/></svg></div>
- </div>
- <svg class="cursor pop" id="cur2" viewBox="0 0 64 64"><path d="M14 6 L14 50 L25 39 L33 58 L41 54 L33 36 L48 36 Z" fill="#fff" stroke="#14143A" stroke-width="3" stroke-linejoin="round"/></svg>
-</div>`);
-document.head.appendChild($('<style>.td{display:block;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.7)}</style>'));
-
-// END: extruded logo diamonds + photo circle + phone
-let dl='';
-for(let k=0;k<3;k++){for(let j=14;j>=0;j--){const front=j==0;const c=k==2?(front?'#D9353B':'#7A1C22'):(front?'#2B2C6E':'#101030');
- dl+=`<div class="ld" data-k="${k}" style="position:absolute;left:${k*70-160}px;top:-90px;width:180px;height:180px;border-radius:34px;background:${c};${front?'border:3px solid rgba(255,255,255,.12);':''}transform:translateZ(${-j*4}px) rotate(45deg)"></div>`}}
-const EN=obj(...P.end,`<div id="logo3d" style="position:absolute;left:0;top:0;transform-style:preserve-3d">${dl}
- <svg width="120" height="120" viewBox="-60 -60 120 120" style="position:absolute;left:10px;top:-60px;transform:translateZ(2px)"><g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M-32 0 L0 -28 L32 0"/><path d="M-21 -8 V30 H21 V-8"/><path d="M20 -16 V-34"/></g></svg></div>`);
-// 2D end overlay (screen space)
-const END2=$(`<div id="end2" style="position:absolute;inset:0;pointer-events:none">
- <div id="ering" style="position:absolute;left:250px;top:560px;width:500px;height:500px">
-  <svg width="500" height="500" viewBox="0 0 500 500" style="position:absolute;inset:0"><circle cx="250" cy="250" r="236" fill="none" stroke="#2B2C6E" stroke-width="16"/><g id="arc"><circle cx="250" cy="250" r="236" fill="none" stroke="#D9353B" stroke-width="16" stroke-linecap="round" stroke-dasharray="370 1113"/></g></svg>
-  <div style="position:absolute;left:26px;top:26px;width:448px;height:448px;border-radius:50%;overflow:hidden;background:#20214F">${photoHTML}</div>
- </div>
- <div id="epill" style="position:absolute;left:0;width:1000px;top:1100px;display:flex;justify-content:center"><div style="background:#fff;color:#181842;border-radius:40px;padding:14px 40px;font-size:44px;font-weight:700;display:flex;align-items:center;gap:18px"><img src="logo.png" style="height:44px">איציק דייטש · ייעוץ משכנתאות</div></div>
- <div id="ephone" style="position:absolute;left:0;width:1000px;top:1210px;display:flex;justify-content:center"><div style="border:5px solid #D9353B;border-radius:26px;padding:6px 44px;font-size:96px;font-weight:700;letter-spacing:1px;white-space:nowrap;display:flex;align-items:center;gap:26px" class="ltr"><svg width="86" height="86" viewBox="0 0 32 32"><path fill="#25D366" d="M16 3C8.8 3 3 8.6 3 15.6c0 2.5.7 4.8 2 6.8L3.6 29l6.8-1.8c1.8 1 3.9 1.6 6 1.6 7.2 0 13-5.6 13-12.6S23.2 3 16 3z"/><path fill="#fff" d="M12 9.5c-.3-.6-.6-.6-.9-.6h-.8c-.3 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.9c.2.2 2.6 4.1 6.4 5.6 3.2 1.2 3.8 1 4.5.9.7-.1 2.2-.9 2.5-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5l-2.4-1.1c-.3-.1-.6-.2-.8.2-.2.4-.9 1.2-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7l-1.4-2.5z"/></svg>053-638-0004</div></div>
- <div id="ecta" style="position:absolute;left:0;width:1000px;top:1400px;text-align:center;font-size:56px;font-weight:700"></div>
-</div>`);
-document.body.appendChild(END2);
-const ectaW=[['שלחו',20.9],['"שולחן"',21.15,'k'],['בוואטסאפ',21.45]];
-const ecta=END2.querySelector('#ecta');const EW=[];
-ectaW.forEach(([s,t,k])=>{const w=$(`<span class="w ${k?'k':''}"><span class="o">${s}</span><span class="f">${s}</span></span>`);ecta.appendChild(w);EW.push({w,f:w.querySelector('.f'),t})});
-
-// sprites (3D floating diamonds / coins / checks)
-const SPR=[];
-for(let i=0;i<26;i++){const r=(n)=>{const x=Math.sin(i*127.1+n*311.7)*43758.5453;return x-Math.floor(x)};
- const kind=i%4;const sz=20+r(1)*34;
- const html=kind==0?`<div class="dm" style="width:${sz}px;height:${sz}px;border:3px solid #D9353B"></div>`:kind==1?`<div class="dm" style="width:${sz}px;height:${sz}px;background:rgba(255,255,255,.85)"></div>`:kind==2?`<div style="width:${sz+8}px;height:${sz+8}px;border-radius:50%;background:#D9353B;display:flex;align-items:center;justify-content:center"><svg width="${sz*.7}" height="${sz*.7}" viewBox="0 0 20 20"><path d="M4 10 L8.5 14.5 L16 6" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></div>`:`<div class="dm" style="width:${sz}px;height:${sz}px;background:#3A3B88"></div>`;
- const o=obj(r(2)*10400-200, (r(3)-.5)*1500, -200-r(4)*700, html);o.sprite=true;o.ph=r(5)*6.28;o.sp=.5+r(6);SPR.push(o)}
-
-// ---------------- camera shots
-const SH=[['g',0],['offer',3.22],['wheel',5.42],['prof',7.52],['route',10.52],['label',13.4],['chat',15.98],['end',19.45]];
-function camAt(t){
- let i=0;for(let k=0;k<SH.length;k++)if(t>=SH[k][1])i=k;
- const DUR=.3;const cur=P[SH[i][0]];let pos=[...cur];let rz=0;
- const hold=t-SH[i][1];
- if(i>0&&hold<DUR){const prev=P[SH[i-1][0]];const p=eio(hold/DUR);pos=prev.map((v,j)=>mix(v,cur[j],p));pos[2]+= -Math.sin(p*Math.PI)*380;rz=Math.sin(p*Math.PI)*-4}
- // gentle push-in during hold
- pos[2]+=Math.min(hold,3.5)*45;
- pos[0]+=Math.sin(t*.7)*10;pos[1]+=Math.cos(t*.6)*8;
- return {pos,rz};
+// ============ S1 grid + S2 photo A (shared photo-space; target roof = cell 0,0 at (378,640))
+const TX=378,TY=640,PX=109,PY=195,RW=82,RH=123;
+const SCAN=[[4,-3],[-3,2],[2,4],[-4,-1],[3,1]];
+function roul(){const pts=[];let t=5.55,dt=.3;let k=0;while(t<6.9){pts.push([t,[Math.round((hash(k,3)-.5)*8),Math.round((hash(k,7)-.5)*7)]]);t+=dt;dt*=.82;k++}pts.push([6.92,[0,0]]);return pts}
+const ROUL=roul();
+function bracketCell(t){
+ if(t<0.12)return [0,0];
+ if(t<5.55){const seg=Math.floor(t/1.1),p=eio(lin(t%1.1,0,.55));const a=SCAN[seg%SCAN.length],b=SCAN[(seg+1)%SCAN.length];
+  if(t>4.4){const p2=eio(lin(t,4.4,5.4));const last=[mix(a[0],b[0],p),mix(a[1],b[1],p)];return last}
+  return [mix(a[0],b[0],p),mix(a[1],b[1],p)]}
+ let cur=ROUL[0][1];for(const [tt,c] of ROUL)if(t>=tt)cur=c;return cur}
+function camS1(t){
+ // returns fx,fy,s,r
+ let s,fx,fy,r;
+ if(t<5.5){const p=t/5.5;s=mix(.30,.48,eio(p));fx=TX+PX*mix(2.2,.6,p);fy=TY+PY*mix(1.4,.4,p);r=mix(-7,-4,p)}
+ else if(t<7.0){const p=eio(lin(t,5.5,7.0));s=mix(.48,1.0,p);fx=TX+PX*mix(.6,0,p);fy=TY+PY*mix(.4,0,p);r=mix(-4,-1,p)}
+ else if(t<7.45){const p=eio(lin(t,7.0,7.45));s=mix(1.0,1.75,p);fx=TX;fy=TY;r=mix(-1,0,p)}
+ else if(t<8.22){const p=lin(t,7.45,8.22);s=mix(1.75,2.7,eio(p));fx=TX;fy=TY;r=mix(0,9,eio(p))}
+ else{const p=lin(t,8.22,8.55);s=emix(2.7,40,ei(p));fx=TX;fy=TY;r=9+p*6}
+ return {fx,fy,s,r}}
+function drawS1(t){
+ const {fx,fy,s,r}=camS1(t);
+ bg();ctx.save();camApply(fx,fy,s,r);
+ const photoA=lin(t,7.28,7.48);
+ if(photoA<1){
+  const span=Math.ceil(1300/(s*PX))+2,spanY=Math.ceil(1500/(s*PY))+2;
+  const ci=Math.round((fx-TX)/PX),cj=Math.round((fy-TY)/PY);
+  for(let i=ci-span;i<=ci+span;i++)for(let j=cj-spanY;j<=cj+spanY;j++){
+   const h=hash(i,j);const g=Math.round(44+h*26);
+   const pulse=Math.max(0,Math.sin(t*1.6-(i*.35+j*.5)))*6;
+   ctx.fillStyle=`rgb(${g+pulse},${g+pulse},${g+10+pulse})`;
+   const x=TX+i*PX-RW/2,y=TY+j*PY-RH/2;ctx.fillRect(x,y,RW,RH);
+   ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x,y+RH*.5,RW,RH*.5);
+  }
+  const red=t<0.12?1:lin(t,6.95,7.1);
+  if(red>0){ctx.fillStyle=RED;ctx.globalAlpha=red;ctx.fillRect(TX-RW/2,TY-RH/2,RW,RH);ctx.globalAlpha=1;
+   ctx.shadowColor='rgba(217,53,59,.8)';ctx.shadowBlur=40*red;ctx.fillRect(TX-RW/2,TY-RH/2,RW,RH);ctx.shadowBlur=0}
+ }
+ if(photoA>0&&IA.complete){ctx.globalAlpha=photoA;ctx.drawImage(IA,0,0);ctx.globalAlpha=1}
+ ctx.restore();
+ // brackets in screen space
+ const [bi,bj]=bracketCell(t);
+ const bx=TX+bi*PX,by=TY+bj*PY;
+ const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);
+ const pt=m.transformPoint(new DOMPoint(bx,by));
+ const lock=lin(t,6.92,7.15);const pad=mix(1.5,1.25,eo(lock));
+ const bw=RW*s*pad,bh=RH*s*pad;const ba=t<0.12?1:(t<8.2?1:1-lin(t,8.2,8.35));
+ ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-bw/2,-bh/2,bw,bh,ba,Math.max(3,Math.min(6,s*6)));ctx.restore();
 }
 
-// ---------------- frame
+// ============ S3 portrait  (8.55–9.35) + photo B table (9.2–10.45)
+const FOLD={x:375,y:981,w:180,h:250};
+function drawPortrait(x,y,w,h){
+ ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+ if(IP&&IP.complete&&IP.naturalWidth){const sc=Math.max(w/IP.naturalWidth,h/IP.naturalHeight);const iw=IP.naturalWidth*sc,ih=IP.naturalHeight*sc;ctx.filter='grayscale(1) contrast(1.08) brightness(.95)';ctx.drawImage(IP,x+(w-iw)/2,y+(h-ih)*.25,iw,ih);ctx.filter='none'}
+ else{const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,'#3A3B60');g.addColorStop(1,'#1E1F3E');ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
+  ctx.fillStyle='#5A5C82';ctx.beginPath();ctx.arc(x+w/2,y+h*.38,w*.17,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(x+w/2,y+h*.95,w*.36,h*.3,0,Math.PI,0);ctx.fill()}
+ ctx.restore()}
+function drawS3(t){
+ bg();
+ const FW=630,FH=875;
+ if(t<9.25){
+  // red full -> shrinks to frame revealing portrait
+  const p=eio(lin(t,8.55,8.82));
+  const w=mix(W*1.1,FW,p),h=mix(H*1.1,FH,p);
+  drawPortrait(CX-FW/2,CY-FH/2,FW,FH);
+  // red mask outside frame shrinking, as border
+  const bw=mix(Math.max(W,H),12,p);
+  ctx.save();ctx.strokeStyle=RED;ctx.lineWidth=bw*2;ctx.strokeRect(CX-w/2-bw,CY-h/2-bw,w+bw*2,h+bw*2);ctx.restore();
+  ctx.fillStyle=RED;ctx.globalAlpha=1-lin(t,8.55,8.7);ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1;
+  brackets(CX-FW*.32,CY-FH*.36,FW*.64,FH*.42,lin(t,8.85,8.95)*(1-lin(t,9.15,9.22)),5);
+  // portrait fades into red folder
+  const f=lin(t,9.12,9.25);if(f>0){ctx.fillStyle=RED;ctx.globalAlpha=f;ctx.fillRect(CX-FW/2,CY-FH/2,FW,FH);ctx.globalAlpha=1}
+  return}
+ // photo B camera
+ let s,fx,fy,r;
+ const s0=FW/FOLD.w;
+ if(t<9.95){const p=eio(lin(t,9.25,9.95));s=mix(s0,1.42,p);fx=mix(FOLD.x,376,p);fy=mix(FOLD.y,700,p);r=mix(0,-4,p)}
+ else{const p=lin(t,9.95,10.45);s=emix(1.42,14,ei(p));fx=mix(376,FOLD.x,eio(p));fy=mix(700,FOLD.y,eio(p));r=mix(-4,0,eio(p))}
+ ctx.save();camApply(fx,fy,s,r);ctx.globalAlpha=lin(t,9.25,9.4);if(IB.complete)ctx.drawImage(IB,0,0);ctx.globalAlpha=1;
+ // keep folder pure red over the fade
+ ctx.fillStyle=RED;ctx.globalAlpha=1-lin(t,9.3,9.45);ctx.fillRect(FOLD.x-FOLD.w/2,FOLD.y-FOLD.h/2,FOLD.w,FOLD.h);ctx.globalAlpha=1;
+ ctx.restore();
+ const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);const pt=m.transformPoint(new DOMPoint(FOLD.x,FOLD.y));
+ const lk=eo(lin(t,9.39,9.6));const ba=lk*(1-lin(t,10.05,10.2));const pad=mix(1.6,1.18,lk);
+ ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-FOLD.w*s*pad/2,-FOLD.h*s*pad/2,FOLD.w*s*pad,FOLD.h*s*pad,ba,5);ctx.restore();
+}
+
+// ============ S4 route line (10.45–13.35)
+function buildPath(){const pts=[];const seg=(x0,y0,x1,y1,n=20)=>{for(let i=0;i<=n;i++)pts.push([mix(x0,x1,i/n),mix(y0,y1,i/n)])};
+ const bez=(p0,p1,p2,p3,n=30)=>{for(let i=0;i<=n;i++){const u=i/n,a=(1-u)**3,b=3*u*(1-u)**2,c=3*u*u*(1-u),d=u**3;pts.push([a*p0[0]+b*p1[0]+c*p2[0]+d*p3[0],a*p0[1]+b*p1[1]+c*p2[1]+d*p3[1]])}};
+ seg(540,2300,540,640);bez([540,640],[540,560],[560,540],[620,530]);seg(620,530,660,530,4);bez([660,530],[720,520],[740,500],[740,420]);seg(740,420,740,-760);
+ const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));return {pts,L}}
+const PATH=buildPath();
+function lenAtY(y){for(let i=0;i<PATH.pts.length;i++)if(PATH.pts[i][1]<=y)return PATH.L[i];return PATH.L[PATH.L.length-1]}
+const LEN_NODE1=lenAtY(900),LEN_BEND=lenAtY(640),LEN_AFTER=lenAtY(420),LEN_N3=lenAtY(-100),LEN_END=PATH.L[PATH.L.length-1];
+function headLen(t){
+ if(t<10.62)return lenAtY(1000);
+ if(t<11.32)return mix(lenAtY(1000),LEN_BEND,eo(lin(t,10.62,11.32)));
+ if(t<12.0)return mix(LEN_BEND,LEN_AFTER+120,eio(lin(t,11.38,11.9)));
+ if(t<12.85)return mix(LEN_AFTER+120,LEN_N3,eio(lin(t,12.04,12.5)));
+ return mix(LEN_N3,LEN_END,eio(lin(t,12.88,13.15)))}
+function ptAt(len){const L=PATH.L;let i=1;while(i<L.length-1&&L[i]<len)i++;const p=cl((len-L[i-1])/(L[i]-L[i-1]||1));return [mix(PATH.pts[i-1][0],PATH.pts[i][0],p),mix(PATH.pts[i-1][1],PATH.pts[i][1],p)]}
+function camYAt(t){const h=ptAt(headLen(t));return h[1]-1000}
+function drawS4(t){
+ bg();
+ if(t<10.62){// red full narrows to a line
+  const p=eio(lin(t,10.45,10.62));const w=mix(W*1.2,14,p);const top=mix(-50,1000,p);
+  ctx.fillStyle=RED;ctx.fillRect(CX-w/2,top,w,H-top+50);return}
+ // camera follows head with slight lag (smooth)
+ const cy=mix(camYAt(t),camYAt(Math.max(10.62,t-.12)),.5);
+ const cx=mix(0,-60,eio(lin(t,11.4,12.0)));
+ ctx.save();ctx.translate(-cx,-cy);
+ // bank dashed straight line
+ const bk=lin(t,11.36,11.7);if(bk>0){ctx.save();ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=4;ctx.setLineDash([12,16]);ctx.beginPath();ctx.moveTo(540,640);ctx.lineTo(540,mix(640,-760,bk));ctx.stroke();ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,.4)';ctx.font=`400 30px ${F}`;ctx.textAlign='right';ctx.globalAlpha=bk;ctx.fillText('הצעת הבנק',515,mix(640,-100,bk));ctx.globalAlpha=1}
+ // red path up to head
+ const hl=headLen(t);ctx.strokeStyle=RED;ctx.lineWidth=14;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
+ let i=0;ctx.moveTo(...PATH.pts[0]);while(i<PATH.pts.length&&PATH.L[i]<=hl){ctx.lineTo(...PATH.pts[i]);i++}const hp=ptAt(hl);ctx.lineTo(...hp);ctx.stroke();
+ // nodes
+ const node=(len,tm,label,end)=>{const q=lin(t,tm,tm+.18);if(q<=0)return;const p=ptAt(len);ctx.save();ctx.translate(p[0],p[1]);const sc=mix(1.8,1,eo(q));ctx.scale(sc,sc);
+  if(end){ctx.fillStyle=RED;ctx.beginPath();ctx.arc(0,0,30,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(-3,10);ctx.lineTo(15,-10);ctx.stroke()}
+  else{ctx.fillStyle='#fff';ctx.fillRect(-15,-15,30,30)}ctx.restore();
+  ctx.globalAlpha=q;ctx.fillStyle='#fff';ctx.font=`700 40px ${F}`;ctx.textAlign='right';ctx.fillText(label,p[0]-46,p[1]+14);ctx.globalAlpha=1};
+ node(LEN_NODE1,10.7,'ניתוח');node(LEN_BEND+40,11.4,'משא ומתן');node(LEN_N3,12.1,'ליווי');node(LEN_END,12.95,'חתימה',1);
+ ctx.restore();
+}
+
+// ============ S5 label card + door (13.35–16.35)
+const CW=640,CH=900;const STRIPE_Y=640; // card-relative
+let BARS=[];{let x=0;for(let i=0;i<70;i++){const w=[3,6,2,8,3,4,2][(i*5)%7];BARS.push([x,w]);x+=w+4+(i%3)}}
+function drawCard(t){
+ // card drawn with top-left at (0,0)
+ ctx.fillStyle='#F3F4F8';ctx.fillRect(0,0,CW,CH);
+ ctx.fillStyle='#181842';ctx.textAlign='right';ctx.direction='rtl';
+ const ap=(a)=>lin(t,a,a+.2);
+ ctx.globalAlpha=ap(13.8);ctx.font=`700 30px ${F}`;ctx.fillText('איציק דייטש',CW-40,64);
+ ctx.font=`400 22px ${F}`;ctx.fillStyle='#55577A';ctx.textAlign='left';ctx.direction='ltr';ctx.fillText('FILE / 0536',40,64);
+ ctx.fillStyle='#E1E2EB';ctx.fillRect(40,90,CW-80,2);
+ ctx.direction='rtl';ctx.textAlign='right';ctx.fillStyle='#55577A';ctx.font=`400 26px ${F}`;ctx.globalAlpha=ap(13.9);ctx.fillText('החזר חודשי · הצעת הבנק',CW-40,140);
+ // 6,240
+ ctx.globalAlpha=ap(13.95);ctx.font=`300 150px ${F}`;ctx.fillStyle=t>14.3?'#A6A7C2':'#181842';ctx.fillText('6,240',CW-40,290);
+ const st=eo(lin(t,14.1,14.35));if(st>0){ctx.fillStyle=RED;ctx.fillRect(CW-40-400*st,218,400*st,12)}
+ // arrow
+ ctx.globalAlpha=ap(14.0);ctx.strokeStyle='#181842';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(56,170);ctx.lineTo(56,530);ctx.moveTo(44,515);ctx.lineTo(56,532);ctx.lineTo(68,515);ctx.stroke();
+ ctx.fillStyle='#55577A';ctx.font=`400 26px ${F}`;ctx.globalAlpha=ap(14.7);ctx.fillText('החזר חודשי · אחרי ליווי',CW-40,360);
+ // 5,610 outline then fill
+ ctx.globalAlpha=ap(14.7);ctx.font=`700 150px ${F}`;
+ const nf=lin(t,15.24,15.45);ctx.lineWidth=2;ctx.strokeStyle='#B5B6CC';ctx.strokeText('5,610',CW-40,510);
+ if(nf>0){ctx.save();ctx.beginPath();ctx.rect(CW-40-460*nf,370,460*nf,170);ctx.clip();ctx.fillStyle='#181842';ctx.fillText('5,610',CW-40,510);ctx.restore()}
+ ctx.globalAlpha=1;
+ // stripe
+ ctx.fillStyle=RED;ctx.fillRect(40,STRIPE_Y-28,CW-80,56);
+ const sp=lin(t,15.4,15.6);if(sp>0){ctx.globalAlpha=sp;ctx.fillStyle='#fff';ctx.font=`700 28px ${F}`;ctx.fillText('₪630 פחות בכל חודש',CW-62,STRIPE_Y+10);ctx.globalAlpha=1}
+ // barcode
+ const bp=lin(t,14.0,14.5);ctx.fillStyle='#181842';BARS.forEach(([x,w],i)=>{if(i/BARS.length<bp&&x+w<CW-80)ctx.fillRect(40+x,720,w,90)});
+ ctx.globalAlpha=ap(14.4);ctx.fillStyle='#8F90A8';ctx.font=`400 20px ${F}`;ctx.fillText('* המספרים להמחשה בלבד',CW-40,858);ctx.globalAlpha=1;
+}
+const DOOR={x:365,y:670};
+function drawS5(t){
+ bg();
+ if(t<13.62){// twist: vertical line -> horizontal bar
+  const p=eio(lin(t,13.35,13.62));ctx.save();ctx.translate(CX,CY);ctx.rotate(mix(90,0,p)*D);ctx.fillStyle=RED;const L=mix(1100,CW-80,p);ctx.fillRect(-L/2,-7,L,14);ctx.restore();return}
+ // card positioned so stripe sits where bar was, then moves to card centre
+ const sc5=t<15.3?1:mix(1,.40,eio(lin(t,15.3,15.95)));
+ let zoom=1,zx=0,zy=0;
+ const settle=eio(lin(t,13.62,13.85));
+ const cardTop=mix(CY-STRIPE_Y,CY-CH/2,settle);
+ // door photo behind
+ const doorA=lin(t,15.3,15.5);
+ // zoom into stripe at the end (15.98–16.35)
+ const zp=lin(t,15.98,16.35);
+ ctx.save();
+ if(zp>0){const z=emix(1,60,ei(zp));const stripeScreenY=CY-CH/2*sc5+STRIPE_Y*sc5;ctx.translate(CX,stripeScreenY);ctx.scale(z,z);ctx.translate(-CX,-stripeScreenY)}
+ if(doorA>0&&IC.complete){const s=2.95*sc5;ctx.save();ctx.globalAlpha=doorA;camApply(DOOR.x,DOOR.y,s,0);ctx.drawImage(IC,0,0);ctx.restore();
+  // shadow of card on door
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.filter='blur(12px)';ctx.fillRect(CX-CW/2*sc5+10,CY-CH/2*sc5+16,CW*sc5,CH*sc5);ctx.filter='none'}
+ ctx.save();ctx.translate(CX,CY);ctx.scale(sc5,sc5);ctx.translate(-CW/2,cardTop-CY);
+ // vertical wipe from stripe
+ const wp=eo(lin(t,13.66,13.95));ctx.beginPath();ctx.rect(0,STRIPE_Y-STRIPE_Y*wp-28,CW,28+STRIPE_Y*wp+(CH-STRIPE_Y)*wp+28);ctx.clip();
+ drawCard(t);ctx.restore();
+ ctx.restore();
+}
+
+// ============ S6 diamond (16.35–19.0) + S7 logo lockup (18.9–23)
+const DS=400,DR=70;
+const WA1=new Path2D('M16 3C8.8 3 3 8.6 3 15.6c0 2.5.7 4.8 2 6.8L3.6 29l6.8-1.8c1.8 1 3.9 1.6 6 1.6 7.2 0 13-5.6 13-12.6S23.2 3 16 3z');const WA2=new Path2D('M12 9.5c-.3-.6-.6-.6-.9-.6h-.8c-.3 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.9c.2.2 2.6 4.1 6.4 5.6 3.2 1.2 3.800 1 4.5.9.7-.1 2.2-.9 2.5-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5l-2.4-1.1c-.3-.1-.6-.2-.8.2-.2.4-.9 1.2-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7l-1.4-2.5z');
+function diamondPath(s=DS,r=DR){const p=new Path2D();const h=s/2;p.roundRect(-h,-h,s,s,r);return p}
+const DPATH=diamondPath();const DPER=4*(DS-2*DR)+2*Math.PI*DR;
+function housePath(sc=1){const p=new Path2D();p.moveTo(-70*sc,10*sc);p.lineTo(0,-55*sc);p.lineTo(70*sc,10*sc);p.moveTo(-46*sc,-12*sc);p.lineTo(-46*sc,70*sc);p.lineTo(46*sc,70*sc);p.lineTo(46*sc,-12*sc);p.moveTo(40*sc,-30*sc);p.lineTo(40*sc,-74*sc);return p}
+const HPATH=housePath();
+function lockPos(){// where the house diamond of the logo sits on screen
+ const LW=440,k=LW/502,lx=CX-LW/2,ly=520;return {lx,ly,k,cx:lx+361*k,cy:ly+141*k,sc:139*k/254}}
+function drawDiamond3D(t,cx,cy,sc,rotY,mode,draw,lightP){
+ // mode 0: outline drawing, 1: echo outlines, 2: solid
+ const layers=mode==0?1:18;const depth=7;
+ for(let L=layers-1;L>=0;L--){ctx.save();
+  const dx=Math.sin(rotY*D)*L*depth*2.4,dy=-L*depth*.9;
+  ctx.translate(cx+dx*sc,cy+dy*sc);ctx.scale(sc*Math.max(.15,Math.cos(rotY*D)),sc);ctx.rotate(45*D);
+  if(mode==2){ctx.fillStyle=L==0?'#2A2B72':`rgb(${52-L*2},${22-L*0.6},${66-L*2})`;ctx.fill(DPATH);if(L>0){ctx.strokeStyle=`rgba(217,53,59,${.5-L*.025})`;ctx.lineWidth=2;ctx.stroke(DPATH)}
+   if(L==0){ctx.strokeStyle=RED;ctx.lineWidth=16;ctx.stroke(DPATH);
+    if(lightP!=null){ctx.save();ctx.clip(DPATH);const g=ctx.createLinearGradient(-300+lightP*600,-300,-140+lightP*600,300);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.28)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(-300,-300,600,600);ctx.restore()}
+    ctx.rotate(-45*D);ctx.strokeStyle='#fff';ctx.lineWidth=14;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke(HPATH)}}
+  else{ctx.strokeStyle=L==0?RED:`rgba(143,144,204,${.55-L*.03})`;ctx.lineWidth=L==0?7:3;
+   if(mode==0){ctx.setLineDash([DPER*draw,DPER*2]);ctx.lineDashOffset=0}
+   ctx.stroke(DPATH);
+   if(L==0){ctx.setLineDash([]);const hp=lin(draw,.55,1);if(hp>0){ctx.rotate(-45*D);ctx.globalAlpha=hp;ctx.strokeStyle='#fff';ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke(HPATH)}}}
+  ctx.restore()}}
+function drawS6(t){
+ bg();
+ if(t<16.5){// red full -> horizontal bar -> shrinking to start point
+  const p=eio(lin(t,16.35,16.5));const h=mix(H*1.2,16,p),w=mix(W*1.2,560,p);ctx.fillStyle=RED;ctx.fillRect(CX-w/2,CY-h/2,w,h);return}
+ const lp=lockPos();
+ const toLock=eio(lin(t,18.9,19.35));
+ const cx=mix(CX,lp.cx,toLock),cy=mix(CY,lp.cy,toLock),sc=mix(1,lp.sc,toLock);
+ if(t<17.15){// bar collapses into the outline drawing
+  const bp=lin(t,16.5,16.65);if(bp<1){const w=mix(560,0,eio(bp));ctx.fillStyle=RED;ctx.fillRect(CX-w/2,CY-8,w,16)}
+  drawDiamond3D(t,cx,cy,sc,0,0,eio(lin(t,16.55,17.1)));}
+ else if(t<17.75){const p=lin(t,17.15,17.75);drawDiamond3D(t,cx,cy,sc,mix(0,38,eio(p)),1,1)}
+ else{const p=lin(t,17.75,19.0);const ry=t<18.4?mix(38,-14,eio(lin(t,17.75,18.4))):mix(-14,0,eio(lin(t,18.4,19.0)));
+  if(toLock<1)drawDiamond3D(t,cx,cy,sc,ry*(1-toLock),2,1,lin(t,17.95,18.7))}
+ // lockup
+ const la=lin(t,19.25,19.45);
+ if(la>0&&LOGO.complete){
+  // chevrons slide in
+  ctx.save();ctx.globalAlpha=la;const off=(1-eo(lin(t,19.25,19.6)))*90;ctx.drawImage(LOGO,lp.lx+off,lp.ly,440,440*283/502);ctx.restore()}
+ if(t>=19.25&&la<1){drawDiamond3D(t,lp.cx,lp.cy,lp.sc,0,2,1,null)}
+ const tx=(s,a,y,font,col='#fff')=>{const q=lin(t,a,a+.25);if(q<=0)return;ctx.globalAlpha=q;ctx.fillStyle=col;ctx.font=font;ctx.textAlign='center';ctx.direction='rtl';ctx.fillText(s,CX,y+(1-eo(q))*20);ctx.globalAlpha=1};
+ tx('איציק דייטש',19.4,1000,`700 104px ${F}`);
+ tx('ייעוץ משכנתאות',19.55,1075,`300 44px ${F}`,'rgba(255,255,255,.75)');
+ // route with bump under
+ const rp=eio(lin(t,19.65,20.2));if(rp>0){ctx.save();ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=3;ctx.beginPath();
+  const y=1150,x0=170,x1=910;const pts=[[x1,y],[620,y],[600,y],[590,y-38],[575,y-48],[505,y-48],[490,y-38],[480,y],[460,y],[x0,y]];
+  // draw progressively from right to left
+  const tot=x1-x0;const lim=x1-tot*rp;ctx.moveTo(x1,y);
+  ctx.lineTo(Math.max(lim,620),y);if(lim<620){ctx.bezierCurveTo(600,y,600,y-48,575,y-48);if(lim<505){ctx.lineTo(505,y-48);ctx.bezierCurveTo(480,y-48,480,y,460,y);ctx.lineTo(Math.max(lim,x0),y)}}
+  ctx.stroke();ctx.restore();
+  const dq=lin(t,20.1,20.25);if(dq>0){ctx.fillStyle=RED;ctx.beginPath();ctx.arc(540,1150-22,9*eo(dq),0,7);ctx.fill()}}
+ // CTA
+ const ca=lin(t,20.25,20.5);if(ca>0){ctx.globalAlpha=ca;ctx.textAlign='center';ctx.direction='rtl';ctx.font=`400 50px ${F}`;
+  const parts=[['שלחו ','#fff'],['"שולחן"','#E0393F'],[' בוואטסאפ','#fff']];
+  // measure for centered rtl composite
+  ctx.font=`400 50px ${F}`;const w0=ctx.measureText('שלחו ').width;ctx.font=`700 50px ${F}`;const w1=ctx.measureText('"שולחן"').width;ctx.font=`400 50px ${F}`;const w2=ctx.measureText(' בוואטסאפ').width;
+  let x=CX+(w0+w1+w2)/2;ctx.textAlign='right';
+  ctx.fillStyle='#fff';ctx.fillText('שלחו ',x,1260);x-=w0;ctx.font=`700 50px ${F}`;ctx.fillStyle='#E0393F';ctx.fillText('"שולחן"',x,1260);x-=w1;ctx.font=`400 50px ${F}`;ctx.fillStyle='#fff';ctx.fillText(' בוואטסאפ',x,1260);
+  ctx.globalAlpha=1}
+ const pa=lin(t,20.45,20.7);if(pa>0){ctx.save();ctx.globalAlpha=pa;ctx.translate(CX,1380);const s=mix(1.25,1,eo(pa));ctx.scale(s,s);
+  ctx.font=`700 92px ${F}`;ctx.direction='ltr';ctx.textAlign='left';const num='053-638-0004';const nw=ctx.measureText(num).width;const tot=nw+100;
+  ctx.save();ctx.translate(-tot/2-4,-78);ctx.scale(2.7,2.7);ctx.fillStyle='#25D366';ctx.fill(WA1);ctx.fillStyle='#fff';ctx.fill(WA2);ctx.restore();
+  ctx.textAlign='left';ctx.font=`700 92px ${F}`;ctx.fillStyle='#fff';ctx.fillText(num,-tot/2+100,0);ctx.restore()}
+}
+
+// ============ frame dispatcher
 function renderFrame(t){
- drawHL(t);
- const {pos,rz}=camAt(t);
- // S1 special: dive into hot tile 2.9–3.22
- const dive=eio(lin(t,2.85,3.3));
- world.style.transform=`translate3d(${500-pos[0]}px,${1120-pos[1]}px,${pos[2]+120}px) rotateZ(${rz}deg)`;
- const bp=beat(t);
- OBJ.forEach((o,idx)=>{
-  if(o.sprite){const fl=Math.sin(t*o.sp+o.ph)*30;o.e.style.transform=`translate3d(${o.x}px,${o.y+fl}px,${o.z}px) rotateZ(${t*40*o.sp+o.ph*57}deg) rotateY(${t*60*o.sp}deg)`;
-   const dx=Math.abs(o.x-pos[0]);o.e.style.display=dx<1300?'block':'none';
-   // keep sprites out of headline band & phone area: fade if projected into top band
-   o.e.style.opacity=.8;return}
-  const dx=Math.abs(o.x-pos[0]);o.e.style.display=dx<1600?'block':'none';
-  const k=idx;const ry=Math.sin(t*.8+k)*7, rx=6+Math.sin(t*.6+k*2)*3;
-  const sc=1+bp*0.008;
-  o.e.style.transform=`translate3d(${o.x}px,${o.y}px,${o.z}px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${sc})`;
- });
- // --- S1 grid
- const hot=t<0.15?1:lin(t,2.28,2.45);
- TILES[HOT].style.background=hot>0?`rgb(${mix(38,217,hot)},${mix(39,53,hot)},${mix(90,59,hot)})`:'';
- TILES[HOT].style.boxShadow=hot>0?`0 0 ${70*hot}px rgba(217,53,59,${.9*hot})`:'';
- TILES[HOT].style.transform=`translateZ(${hot*30}px) scale(${1+hot*.25})`;
- brk.style.opacity=hot;brk.style.transform=`scale(${1.6-.6*eo(hot)})`;
- TILES[HOT].querySelector('#hhouse').style.opacity=hot;
- TILES.forEach((tl,i)=>{if(i==HOT)return;const row=Math.floor(i/9),col=i%9;const wave=Math.max(0,Math.sin(t*3-row*.5-col*.3));tl.style.transform=`translateZ(${wave*6}px)`;tl.style.opacity=t<0.15?1:.55+.45*cl(1-lin(t,2.3,2.6)*.4)});
- G.e.style.transform=`translate3d(${G.x}px,${G.y}px,${G.z+dive*1100}px) rotateX(6deg) rotateZ(${-t*1.5}deg)`;G.e.style.opacity=1-lin(t,3.12,3.3);
- // --- S2 offer
- const o2=OF.e;['r1','r2','r3','r4'].forEach((id,i)=>{const r=o2.querySelector('#'+id);const ap=eo(lin(t,3.3+i*.12,3.6+i*.12));r.style.opacity=ap;r.style.transform=`translateX(${(1-ap)*-40}px)`;
-  r.style.background=(id=='r2'&&t>4.0&&t<4.9)?'rgba(217,53,59,.18)':'transparent'});
- const ob=o2.querySelector('#ofb');const obp=lin(t,5.1,5.35);ob.style.opacity=obp;ob.style.transform=`translateZ(90px) scale(${obp>0?mix(1.6,1,eob(obp)):1.6}) rotate(-6deg)`;
- // --- S3 wheel
- const w3=WH.e;const spinT=lin(t,5.95,7.35);const ang=-20+eo(spinT)*(1440+202.5)+(t<5.95?Math.sin(t*2)*4:0);
- w3.querySelector('#wrot').setAttribute('transform',`rotate(${ang})`);
- const c1=w3.querySelector('#cur1');const cp=eio(lin(t,5.45,5.84));const click=lin(t,5.84,5.98);
- c1.style.left=mix(620,360,cp)+'px';c1.style.top=mix(880,740,cp)+'px';c1.style.transform=`translateZ(110px) scale(${1-Math.sin(click*Math.PI)*.2})`;c1.style.opacity=t<7.1?1:1-lin(t,7.1,7.3);
- w3.querySelector('#spinb').style.transform=`translateZ(70px) scale(${1-Math.sin(click*Math.PI)*.08})`;
- w3.querySelector('#spinb').style.background=click>0&&click<1?'#E8E9F7':'#fff';
- // --- S4 profile
- const p4=PR.e;const chip=p4.querySelector('#chip');const cp4=eio(lin(t,9.2,9.6));chip.style.left=mix(8,510,cp4)+'px';
- const sd=p4.querySelector('#side');const sp4=lin(t,9.5,9.75);sd.style.opacity=sp4;sd.style.transform=`translateZ(100px) scale(${sp4>0?mix(1.5,1,eob(sp4)):1.5})`;
- // --- S5 route
- const r5=RT.e;const rp=r5.querySelector('#rp');const L=rp.getTotalLength();rp.style.strokeDasharray=L;
- const prog=t<10.6?0:t<10.9?lin(t,10.6,10.9)*.28:t<11.38?.28:t<11.6?mix(.28,.48,lin(t,11.38,11.6)):t<12.04?.48:t<12.3?mix(.48,.68,lin(t,12.04,12.3)):t<12.88?.68:mix(.68,1,eo(lin(t,12.88,13.1)));
- rp.style.strokeDashoffset=L*(1-prog);
- [['n1','t1',10.68],['n2','t2',11.38],['n3','t3',12.04],['n4','t4',12.88]].forEach(([n,tt,tm])=>{const q=lin(t,tm+.05,tm+.25);const g=r5.querySelector('#'+n);g.style.opacity=q;g.style.transformOrigin='center';g.style.transformBox='fill-box';g.style.transform=`scale(${q>0?mix(1.8,1,eob(q)):0})`;
-  const l=r5.querySelector('#'+tt);l.style.opacity=q;l.style.transform=`translateX(${(1-eo(q))*30}px)`});
- // --- S6 label
- const l6=LB.e;l6.querySelector('#olds').style.width=(eo(lin(t,14.6,14.9))*92)+'%';
- l6.querySelector('#old').style.color=t>14.75?'#A6A7C2':'#181842';
- const np=lin(t,15.24,15.5);const nw=l6.querySelector('#new');nw.style.opacity=np;nw.style.transform=`translateY(${(1-eo(np))*30}px)`;nw.style.color=np>=1?'#181842':'#D9353B';
- const bar=l6.querySelector('#bar');bar.style.clipPath=`inset(0 0 0 ${(1-eo(lin(t,15.45,15.8)))*100}%)`;
- // --- S7 chat
- const c7=CH.e;const typed='שולחן';const tp=lin(t,16.62,17.05);const n=Math.round(tp*typed.length);
- c7.querySelector('#inp').innerHTML=(n?typed.slice(0,n):'<span style="color:rgba(255,255,255,.35)">הודעה</span>')+((t>16.4&&t<17.2&&Math.floor(t*4)%2==0)?'<span style="color:#25D366">|</span>':'');
- if(t>17.22)c7.querySelector('#inp').innerHTML='<span style="color:rgba(255,255,255,.35)">הודעה</span>';
- const b1p=lin(t,16.0,16.25);const b1=c7.querySelector('#b1');b1.style.opacity=b1p;b1.style.transform=`scale(${mix(.8,1,eob(b1p))})`;
- const b2p=lin(t,17.22,17.42);const b2=c7.querySelector('#b2');b2.style.opacity=b2p;b2.style.transform=`translateY(${(1-eo(b2p))*60}px) scale(${mix(.7,1,eob(b2p))})`;
- const b3=c7.querySelector('#b3');b3.style.opacity=(t>17.55&&t<17.98)?1:0;b3.querySelectorAll('.td').forEach((d,i)=>d.style.transform=`translateY(${-Math.max(0,Math.sin(t*12-i))*8}px)`);
- const b4p=lin(t,17.98,18.2);const b4=c7.querySelector('#b4');b4.style.opacity=b4p;b4.style.transform=`scale(${mix(.8,1,eob(b4p))})`;b4.style.transformOrigin='left top';
- const c2=c7.querySelector('#cur2');const cp7=eio(lin(t,16.9,17.15));const clk=lin(t,17.15,17.28);c2.style.left=mix(420,40,cp7)+'px';c2.style.top=mix(700,830,cp7)+'px';c2.style.transform=`translateZ(110px) scale(${1-Math.sin(clk*Math.PI)*.2})`;c2.style.opacity=t<16.2?0:t<17.6?1:1-lin(t,17.6,17.8);
- c7.querySelector('#sendb').style.transform=`scale(${1-Math.sin(clk*Math.PI)*.15})`;
- // --- END
- const lg=EN.e.querySelector('#logo3d');const ein=eo(lin(t,19.45,20.2));const eup=eio(lin(t,20.15,20.6));
- const lrot=mix(-70,0,ein)+Math.sin(t*1.5)*6*(1-eup);
- lg.style.transform=`translateY(${mix(0,-700,eup)}px) scale(${mix(1,.55,eup)}) rotateY(${lrot}deg) rotateX(${mix(25,8,ein)}deg) scale(${mix(1.6,1,ein)})`;
- const showEnd=t>=20.35;END2.style.display=t>=20.3?'block':'none';
- const rg=END2.querySelector('#ering');const rp2=eo(lin(t,20.5,20.9));rg.style.opacity=rp2;rg.style.transform=`scale(${mix(.6,1,eob(rp2))})`;
- END2.querySelector('#arc').setAttribute('transform',`rotate(${t*90} 250 250)`);
- const pl=END2.querySelector('#epill');const pp=lin(t,20.6,20.9);pl.style.opacity=pp;pl.style.transform=`translateY(${(1-eo(pp))*30}px)`;
- const ph=END2.querySelector('#ephone');const php=lin(t,20.75,21.0);ph.style.opacity=php;ph.style.transform=`scale(${php>0?mix(1.5,1,eob(php)):1.5}) rotate(${mix(-6,-2,php)}deg) scale(${1+bp*.015})`;
- EW.forEach(W=>{const q=lin(t,W.t,W.t+.15);W.f.style.clipPath=`inset(-10% 0 -10% ${(1-q)*100}%)`});
- ecta.style.opacity=lin(t,20.85,21.0);
- // fade cards behind end overlay
- document.getElementById('cam').style.opacity=1;
+ ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.filter='none';ctx.setLineDash([]);
+ if(t<8.55)drawS1(t);
+ else if(t<10.45)drawS3(t);
+ else if(t<13.35)drawS4(t);
+ else if(t<16.35)drawS5(t);
+ else drawS6(t);
+ drawCaps(t);
 }
 window.renderFrame=renderFrame;
-window.ready=document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r})))).then(()=>{renderFrame(0);return true});
+window.ready=document.fonts.ready.then(()=>Promise.all([`300 40px ${F}`,`400 40px ${F}`,`700 40px ${F}`].map(f=>document.fonts.load(f,'אבג 0123,')))).then(()=>Promise.all([IA,IB,IC,LOGO,IP].filter(Boolean).map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r})))).then(()=>{renderFrame(0);return true});
 </script></body></html>
