@@ -69,20 +69,21 @@ function camApply(fx,fy,s,r){ctx.translate(CX,CY);ctx.rotate(r*D);ctx.scale(s,s)
 // ============ S1 grid + S2 photo A (shared photo-space; target roof = cell 0,0 at (378,640))
 const TX=378,TY=640,PX=109,PY=195,RW=82,RH=123;
 const SCAN=[[4,-3],[-3,2],[2,4],[-4,-1],[3,1]];
-function roul(){const pts=[];let t=5.55,dt=.3;let k=0;while(t<6.9){pts.push([t,[Math.round((hash(k,3)-.5)*8),Math.round((hash(k,7)-.5)*7)]]);t+=dt;dt*=.82;k++}pts.push([6.92,[0,0]]);return pts}
+function roul(){const pts=[];let t=5.55,dt=.3;let k=0;while(t<6.9){pts.push([t,[Math.round((hash(k,3)-.5)*8),Math.round((hash(k,7)-.5)*6)]]);t+=dt;dt*=.82;k++}pts.push([6.92,[0,0]]);return pts}
 const ROUL=roul();
-function bracketCell(t){
- if(t<0.12)return [0,0];
- if(t<5.55){const seg=Math.floor(t/1.1),p=eio(lin(t%1.1,0,.55));const a=SCAN[seg%SCAN.length],b=SCAN[(seg+1)%SCAN.length];
-  if(t>4.4){const p2=eio(lin(t,4.4,5.4));const last=[mix(a[0],b[0],p),mix(a[1],b[1],p)];return last}
-  return [mix(a[0],b[0],p),mix(a[1],b[1],p)]}
- let cur=ROUL[0][1];for(const [tt,c] of ROUL)if(t>=tt)cur=c;return cur}
+const LP=172,DSZ=98,DRAD=20;
+const lpos=(i,j)=>[TX+i*LP+(((j%2)+2)%2)*LP/2,TY+j*LP/2];
+const TILE=new Path2D();TILE.roundRect(-DSZ/2,-DSZ/2,DSZ,DSZ,DRAD);
+const SCANP=[[3,-5],[-3,4],[1,7],[-4,-2],[2,3]];
+function bracketPos(t){
+ if(t<0.12)return lpos(0,0);
+ if(t<5.55){const seg=Math.floor(t/1.1),p=eio(lin(t%1.1,0,.55));const a=lpos(...SCANP[seg%5]),b=lpos(...SCANP[(seg+1)%5]);return [mix(a[0],b[0],p),mix(a[1],b[1],p)]}
+ let cur=ROUL[0][1];for(const [tt,c] of ROUL)if(t>=tt)cur=c;return lpos(cur[0],cur[1]*2)}
 function camS1(t){
- // returns fx,fy,s,r
  let s,fx,fy,r;
- if(t<5.5){const p=t/5.5;s=mix(.30,.48,eio(p));fx=TX+PX*mix(2.2,.6,p);fy=TY+PY*mix(1.4,.4,p);r=mix(-7,-4,p)}
- else if(t<7.0){const p=eio(lin(t,5.5,7.0));s=mix(.48,1.0,p);fx=TX+PX*mix(.6,0,p);fy=TY+PY*mix(.4,0,p);r=mix(-4,-1,p)}
- else if(t<7.45){const p=eio(lin(t,7.0,7.45));s=mix(1.0,1.75,p);fx=TX;fy=TY;r=mix(-1,0,p)}
+ if(t<5.5){const p=t/5.5;s=mix(.66,.8,eio(p));fx=TX+LP*mix(1.3,.4,p);fy=TY+LP*mix(1.6,.5,p);r=mix(-7,-4,p)}
+ else if(t<7.0){const p=eio(lin(t,5.5,7.0));s=mix(.8,1.1,p);fx=TX+LP*mix(.4,0,p);fy=TY+LP*mix(.5,0,p);r=mix(-4,-1,p)}
+ else if(t<7.45){const p=eio(lin(t,7.0,7.45));s=mix(1.1,1.75,p);fx=TX;fy=TY;r=mix(-1,0,p)}
  else if(t<8.22){const p=lin(t,7.45,8.22);s=mix(1.75,2.7,eio(p));fx=TX;fy=TY;r=mix(0,9,eio(p))}
  else{const p=lin(t,8.22,8.55);s=emix(2.7,40,ei(p));fx=TX;fy=TY;r=9+p*6}
  return {fx,fy,s,r}}
@@ -90,29 +91,43 @@ function drawS1(t){
  const {fx,fy,s,r}=camS1(t);
  bg();ctx.save();camApply(fx,fy,s,r);
  const photoA=lin(t,7.28,7.48);
- if(photoA<1){
-  const span=Math.ceil(1300/(s*PX))+2,spanY=Math.ceil(1500/(s*PY))+2;
-  const ci=Math.round((fx-TX)/PX),cj=Math.round((fy-TY)/PY);
-  for(let i=ci-span;i<=ci+span;i++)for(let j=cj-spanY;j<=cj+spanY;j++){
-   const h=hash(i,j);const g=Math.round(44+h*26);
-   const pulse=Math.max(0,Math.sin(t*1.6-(i*.35+j*.5)))*6;
-   ctx.fillStyle=`rgb(${g+pulse},${g+pulse},${g+10+pulse})`;
-   const x=TX+i*PX-RW/2,y=TY+j*PY-RH/2;ctx.fillRect(x,y,RW,RH);
-   ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x,y+RH*.5,RW,RH*.5);
+ const gridA=1-lin(t,7.08,7.32);
+ if(gridA>0){
+  ctx.globalAlpha=gridA;
+  const span=Math.ceil(1150/(s*LP))+1,spanY=Math.ceil(1150/(s*LP/2))+1;
+  const ci=Math.round((fx-TX)/LP),cj=Math.round((fy-TY)/(LP/2));
+  for(let j=cj-spanY;j<=cj+spanY;j++)for(let i=ci-span;i<=ci+span;i++){
+   if(i==0&&j==0)continue;
+   const h=hash(i,j);const g=Math.round(44+h*24);
+   const pulse=Math.max(0,Math.sin(t*1.6-(i*.35+j*.25)))*7;
+   const [x,y]=lpos(i,j);
+   ctx.setTransform(1,0,0,1,0,0);
+   ctx.fillStyle=`rgb(${g+pulse},${g+pulse},${g+12+pulse})`;
+   const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx+x,-fy+y).rotate(45);
+   ctx.setTransform(m);ctx.fill(TILE);
   }
-  const red=t<0.12?1:lin(t,6.95,7.1);
-  if(red>0){ctx.fillStyle=RED;ctx.globalAlpha=red;ctx.fillRect(TX-RW/2,TY-RH/2,RW,RH);ctx.globalAlpha=1;
-   ctx.shadowColor='rgba(217,53,59,.8)';ctx.shadowBlur=40*red;ctx.fillRect(TX-RW/2,TY-RH/2,RW,RH);ctx.shadowBlur=0}
+  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;camApply(fx,fy,s,r);
  }
+ // the chosen one: logo diamond, then morphs into the red roof
+ const red=t<0.12?1:lin(t,6.95,7.1);
+ const mo=eio(lin(t,7.05,7.35));
+ ctx.save();ctx.translate(TX,TY);
+ const w=mix(DSZ,RW,mo),hh=mix(DSZ,RH,mo),rr=mix(DRAD,3,mo);
+ ctx.rotate(mix(45,0,mo)*D);
+ const g0=Math.round(44+hash(0,0)*24);
+ ctx.fillStyle=red>0?`rgb(${mix(g0,217,red)},${mix(g0,53,red)},${mix(g0+12,59,red)})`:`rgb(${g0},${g0},${g0+12})`;
+ if(red>0){ctx.shadowColor='rgba(217,53,59,.8)';ctx.shadowBlur=40*red*(1-mo)}
+ ctx.beginPath();ctx.roundRect(-w/2,-hh/2,w,hh,rr);ctx.fill();ctx.shadowBlur=0;
+ if(red>0&&mo<1){ctx.rotate(-mix(45,0,mo)*D);ctx.globalAlpha=red*(1-mo);ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';ctx.scale(mix(.42,.3,mo),mix(.42,.3,mo));ctx.stroke(HPATH);ctx.globalAlpha=1}
+ ctx.restore();
  if(photoA>0&&IA.complete){ctx.globalAlpha=photoA;ctx.drawImage(IA,0,0);ctx.globalAlpha=1}
  ctx.restore();
  // brackets in screen space
- const [bi,bj]=bracketCell(t);
- const bx=TX+bi*PX,by=TY+bj*PY;
+ const [bx,by]=bracketPos(t);
  const m=new DOMMatrix().translate(CX,CY).rotate(r).scale(s).translate(-fx,-fy);
  const pt=m.transformPoint(new DOMPoint(bx,by));
  const lock=lin(t,6.92,7.15);const pad=mix(1.5,1.25,eo(lock));
- const bw=RW*s*pad,bh=RH*s*pad;const ba=t<0.12?1:(t<8.2?1:1-lin(t,8.2,8.35));
+ const bw=mix(DSZ*1.42,RW,mo)*s*pad,bh=mix(DSZ*1.42,RH,mo)*s*pad;const ba=t<0.12?1:(t<8.2?1:1-lin(t,8.2,8.35));
  ctx.save();ctx.translate(pt.x,pt.y);ctx.rotate(r*D);brackets(-bw/2,-bh/2,bw,bh,ba,Math.max(3,Math.min(6,s*6)));ctx.restore();
 }
 
