@@ -10,16 +10,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;300;400;500;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/hero.webp">
-<link rel="stylesheet" href="v9.css?v=13">
-<link rel="stylesheet" href="order.css?v=13">
-<link rel="stylesheet" href="read.css?v=13">
-<link rel="stylesheet" href="magic.css?v=13">
-<script defer src="magic.js?v=13"></script>
-<link rel="stylesheet" href="anim.css?v=13">
-<link rel="stylesheet" href="quest.css?v=13">
-<script defer src="quest.js?v=13"></script>
-<script defer src="anim.js?v=13"></script>
-<script defer src="v9.js?v=13"></script>
+<link rel="stylesheet" href="v9.css?v=15">
+<link rel="stylesheet" href="order.css?v=15">
+<link rel="stylesheet" href="read.css?v=15">
+<link rel="stylesheet" href="magic.css?v=15">
+<script defer src="magic.js?v=15"></script>
+<link rel="stylesheet" href="anim.css?v=15">
+<link rel="stylesheet" href="quest.css?v=15">
+<script defer src="quest.js?v=15"></script>
+<script defer src="anim.js?v=15"></script>
+<script defer src="v9.js?v=15"></script>
 </head>
 <body>
 <a class="skip" href="#main">דילוג לתוכן</a>
@@ -31,7 +31,7 @@
     <a href="#ch-home" data-sec="ch-home">הבית</a><a href="#ch-bank" data-sec="ch-bank">הבנק</a><a href="#ch-me" data-sec="ch-me">איציק</a><a href="#ch-road" data-sec="ch-road">הדרך</a><a href="#ch-end" data-sec="ch-end">הסוף הטוב</a>
   </nav>
   <button class="hd__quest" type="button" aria-haspopup="dialog" aria-controls="questPanel" aria-label="המשימות שלכם: 0 מתוך 3">
-    <span class="hd__keys"><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i></span><span class="hd__qt"><b id="qCount">0</b>/3</span>
+    <span class="hd__keys"><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i></span><span class="hd__qt">הדו״ח שלכם <b id="qCount">0</b>/3</span>
   </button>
   <a class="btn btn--sm hd__cta" href="#contact"><span class="hd__save" aria-hidden="true"><b>₪<span id="hdSave">0</span></b> מחכים לכם</span><span class="hd__cta-t">לשיחת היכרות</span></a>
   <i class="hd__prog" aria-hidden="true"><i id="hdProg"></i></i>
@@ -45,6 +45,13 @@
     <li data-q="m3"><a href="#ch-road"><span class="qi"></span>ספרו לנו מה המצב שלכם</a></li>
   </ol>
 </div>
+<aside class="qintro" id="qintro" hidden aria-labelledby="qiT">
+  <button class="qintro__x" type="button" aria-label="סגירה">×</button>
+  <p class="qintro__keys" aria-hidden="true">🔑🔑🔑</p>
+  <p id="qiT" class="qintro__t">3 מפתחות, דקה אחת, <b>דו״ח חיסכון אישי</b></p>
+  <p class="qintro__p">אספו 3 מפתחות לאורך העמוד ותקבלו דו״ח עם המספרים שלכם: כמה הבנק ירוויח, וכמה יכול להישאר אצלכם.</p>
+  <a class="btn btn--sm" href="#ch-bank" id="qiGo">בואו נתחיל <span class="arr" aria-hidden="true">←</span></a>
+</aside>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog class="report" id="report" aria-labelledby="rTitle">
   <form method="dialog"><button class="report__x" aria-label="סגירה">×</button></form>
@@ -83,6 +90,7 @@
   <div class="hero__cta">
     <p>אני בונה לכם תמהיל משכנתא שמקטין את החלק של הבנק — ומגדיל את החלק שלכם.</p>
     <a class="btn" href="#contact">לשיחת היכרות חינם <span class="arr" aria-hidden="true">←</span></a>
+    <a class="hero__game" href="#ch-bank">🔑 או: קבלו דו״ח חיסכון אישי ב-3 צעדים</a>
   </div>
   <ul class="hero__proof" aria-label="למה איציק">
     <li><b>ללא</b> עמלת בנק</li><li><b>שיחה ראשונה</b> חינם</li><li><b>אני</b> עובד בשבילכם</li>
@@ -118,6 +126,7 @@
         <div class="bar bar--bank"><i id="barBank"></i><span>הרווח של הבנק</span></div>
       </div>
     </div>
+    <p class="mbadge" data-q="m1"><span class="mbadge__k">🔑 משימה 1 מתוך 3</span> הזיזו את הסכום או התקופה, ותראו את המספר שלכם</p>
     <form class="bank__ctrl" aria-label="שנו את המספרים שלכם" onsubmit="return false">
       <label>סכום המשכנתא<output id="vAmt">₪1,200,000</output><input id="iAmt" type="range" min="300000" max="3000000" step="50000" value="1200000"></label>
       <label>תקופה<output id="vYrs">25 שנה</output><input id="iYrs" type="range" min="5" max="30" step="1" value="25"></label>
@@ -162,6 +171,7 @@
       <p class="magic__kicker">על המספרים שלכם מפרק 02</p>
       <h2 id="t-magic" class="h2">לחצו, ותראו מה קורה כשמישהו יושב לידכם.</h2>
     </div>
+    <p class="mbadge" data-q="m2"><span class="mbadge__k">🔑 משימה 2 מתוך 3</span> לחצו על "התמהיל של איציק"</p>
     <div class="magic__switch" role="group" aria-label="בחרו תמהיל">
       <i class="magic__knob" aria-hidden="true"></i>
       <button type="button" data-mix="bank" aria-pressed="true">ההצעה של הבנק</button>
@@ -185,6 +195,7 @@
 <section class="road" id="ch-road" aria-labelledby="t-road">
   <div class="road__pin">
     <div class="road__head"><div class="chap"><span class="chap__no">04</span><span class="chap__name">הדרך</span></div><h2 id="t-road" class="h2">ארבעה צעדים עד המפתח.</h2>
+      <p class="mbadge mbadge--light" data-q="m3"><span class="mbadge__k">🔑 משימה 3 מתוך 3</span> בחרו את המצב שלכם, ושלב 01 יתאים את עצמו</p>
       <div class="quiz" role="group" aria-labelledby="quizT"><span id="quizT" class="quiz__t">מה המצב שלכם?</span>
         <button type="button" data-sit="first">דירה ראשונה</button><button type="button" data-sit="upgrade">משפרי דיור</button><button type="button" data-sit="refi">מחזור משכנתא</button>
       </div></div>

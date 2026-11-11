@@ -21,7 +21,7 @@
     $$('.hd__keys .k').forEach((k, i) => k.classList.toggle('on', i < n));
     $('#qCount').textContent = n;
     qBtn.setAttribute('aria-label', `המשימות שלכם: ${n} מתוך 3`);
-    $$('.qpanel__list li').forEach(li => li.classList.toggle('done', !!state[li.dataset.q]));
+    $$('.qpanel__list li, .mbadge').forEach(li => li.classList.toggle('done', !!state[li.dataset.q]));
     hd.classList.toggle('is-done', n === 3);
     if (state.sit) { $$('.quiz button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sit === state.sit)); }
   }
@@ -93,6 +93,20 @@
       el.animate([{ transform: 'translate(-50%,-50%) rotate(0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d + 120}px) rotate(${Math.random() * 540}deg)`, opacity: 0 }], { duration: 1200 + Math.random() * 600, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => el.remove();
     }
   }
+
+  // הזמנה למשחק: מופיעה פעם אחת, כשהגולש מתחיל לגלול
+  const intro = $('#qintro');
+  let seen = false; try { seen = localStorage.getItem('itzikIntro') === '1'; } catch (e) {}
+  const hideIntro = () => { intro.hidden = true; try { localStorage.setItem('itzikIntro', '1'); } catch (e) {} };
+  if (!seen && count() < 3) {
+    const show = () => { if (scrollY > innerHeight * .35) { intro.hidden = false; removeEventListener('scroll', show); } };
+    addEventListener('scroll', show, { passive: true });
+    setTimeout(() => { if (!seen && count() < 3) intro.hidden = false; }, 2600);
+  }
+  intro.querySelector('.qintro__x').addEventListener('click', hideIntro);
+  $('#qiGo').addEventListener('click', hideIntro);
+  document.querySelector('.hero__game') && document.querySelector('.hero__game').addEventListener('click', hideIntro);
+  ['#iAmt', '#iYrs', '#iRate'].forEach(s => $(s) && $(s).addEventListener('change', hideIntro));
 
   paint(); applySit();
 })();
