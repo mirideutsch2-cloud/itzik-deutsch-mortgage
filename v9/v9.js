@@ -34,8 +34,6 @@
     $('#vAmt').textContent = $('#oAmt').textContent = '₪' + fmt(principal);
     $('#vYrs').textContent = iYrs.value + ' שנה'; $('#oYrs').textContent = iYrs.value;
     $('#vRate').textContent = (+iRate.value).toFixed(1) + '%';
-    $('#saveNum').textContent = fmt(Math.round(save / 1000) * 1000);
-    $('#waitNum').textContent = fmt(pay - pay2);
     paintBank();
   }
   function paintBank() {

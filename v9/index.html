@@ -8,11 +8,14 @@
 <meta name="description" content="איציק דייטש, יועץ משכנתאות עצמאי. הבנק תמיד מרוויח — הפעם גם אתם.">
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;400;700&family=Frank+Ruhl+Libre:wght@300;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;300;400;500;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/hero.webp">
-<link rel="stylesheet" href="v9.css">
-<link rel="stylesheet" href="order.css">
-<script defer src="v9.js"></script>
+<link rel="stylesheet" href="v9.css?v=12">
+<link rel="stylesheet" href="order.css?v=12">
+<link rel="stylesheet" href="read.css?v=12">
+<link rel="stylesheet" href="magic.css?v=12">
+<script defer src="magic.js?v=12"></script>
+<script defer src="v9.js?v=12"></script>
 </head>
 <body>
 <a class="skip" href="#main">דילוג לתוכן</a>
@@ -85,7 +88,7 @@
       <label>ריבית ממוצעת<output id="vRate">4.6%</output><input id="iRate" type="range" min="2" max="7" step="0.1" value="4.6"></label>
     </form>
 
-    <p class="bank__note">חישוב לפי לוח שפיצר וריבית קבועה, להמחשה בלבד. בלי הצמדה ועמלות. ההשוואה היא לתמהיל שחוסך 0.4% בממוצע.</p>
+    <p class="bank__note">חישוב לפי לוח שפיצר וריבית קבועה, להמחשה בלבד. בלי הצמדה ועמלות. ההשוואה היא לתמהיל לדוגמה, כמו בפרק 03.</p>
   </div>
   </div>
   <div class="bank__after wrap-band">
@@ -116,6 +119,32 @@
   </ul>
 </section>
 
+<!-- פרק 03ב · הקסם — חוויה אינטראקטיבית: לפני/אחרי על המספרים של הגולש -->
+<section class="magic" id="ch-magic" aria-labelledby="t-magic">
+  <div class="magic__in">
+    <div class="magic__head">
+      <p class="magic__kicker">על המספרים שלכם מפרק 02</p>
+      <h2 id="t-magic" class="h2">לחצו, ותראו מה קורה כשמישהו יושב לידכם.</h2>
+    </div>
+    <div class="magic__switch" role="group" aria-label="בחרו תמהיל">
+      <i class="magic__knob" aria-hidden="true"></i>
+      <button type="button" data-mix="bank" aria-pressed="true">ההצעה של הבנק</button>
+      <button type="button" data-mix="itzik" aria-pressed="false">התמהיל של איציק <span class="magic__hint" aria-hidden="true"></span></button>
+    </div>
+    <div class="magic__mix" id="mix">
+      <div class="seg"><b>פריים</b><span class="seg__r"></span></div>
+      <div class="seg"><b>קבועה לא צמודה</b><span class="seg__r"></span></div>
+      <div class="seg"><b>משתנה כל 5 שנים</b><span class="seg__r"></span></div>
+    </div>
+    <dl class="magic__stats" aria-live="polite">
+      <div><dt>החזר חודשי</dt><dd>₪<span id="mPay">0</span></dd></div>
+      <div><dt>הבנק ירוויח מכם</dt><dd>₪<span id="mInt">0</span></dd></div>
+      <div class="magic__save"><dt>נשאר אצלכם</dt><dd>₪<span id="mSave">0</span></dd></div>
+    </dl>
+    <p class="magic__note">הסכום והתקופה הם מה שבחרתם למעלה. שיעורי הריבית במסלולים להמחשה בלבד. את התמהיל האמיתי בונים יחד בשיחה.</p>
+  </div>
+</section>
+
 <!-- פרק 4 · הדרך (רצועה אופקית) -->
 <section class="road" id="ch-road" aria-labelledby="t-road">
   <div class="road__pin">
@@ -136,7 +165,7 @@
   
   <p class="end__num" aria-hidden="true">₪<span id="saveNum">99,000</span></p>
   <h2 id="t-end" class="h2">זה מה שיכול להישאר אצלכם.<br><span>לא אצל הבנק.</span></h2>
-  <p class="end__sub">הערכה לפי המספרים שהזנתם בפרק 02, בתמהיל שחוסך 0.4% ריבית בממוצע.</p>
+  <p class="end__sub">הערכה לפי המספרים שהזנתם בפרק 02, בתמהיל לדוגמה מפרק 03.</p>
   <div class="end__scene">
     <p>יום החתימה. אתם יושבים מול אותו פקיד, אבל הפעם אתם מבינים כל שורה. ההחזר החודשי נמוך יותר, התמהיל בנוי בשבילכם, ואת ההפרש אתם שמים על המרפסת.</p>
     <a class="btn btn--light" href="#contact">אני רוצה להגיע ליום הזה <span class="arr" aria-hidden="true">←</span></a>

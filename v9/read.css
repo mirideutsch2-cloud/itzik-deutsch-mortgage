@@ -1,0 +1,23 @@
+/* קריאות (2026-11-11, "עדיין קשה לקרוא") — טקסט קריא לא דק, לא אפור, לא קטן */
+:root{--mute:#3E4066;--t-micro:14px;--t-body:clamp(18px, 16.5px + .35vw, 20px);--t-h3:clamp(20px, 17px + .6vw, 26px)}
+body{line-height:1.65}
+/* כל טקסט קריאה: 400. דק (200) רק בתצוגה ענקית */
+.lead,.bank__pre,.step p,.invite__what,.bank__feel,.end__scene p,.me__story,.bank__wait,.hero__cta p{font-weight:400!important;line-height:1.55!important}
+.h2,.me__quote{font-weight:300!important;line-height:1.05!important}
+.me__quote em,.hero__l3 em,.invite__title em{font-weight:700!important}
+.me__story{color:var(--ink)!important;font-size:var(--t-body)!important;max-width:58ch}
+.me__story p:first-child,.me__story p:last-child{color:var(--mute)}
+.me__sig span,.me__facts span{font-size:15px;color:var(--mute)}
+.hero__cta p{font-size:18px;opacity:1;text-shadow:0 1px 12px rgba(24,24,66,.5)}
+.hero__shade{background:linear-gradient(to top,rgba(24,24,66,.95) 0%,rgba(24,24,66,.7) 38%,rgba(24,24,66,.2) 68%,rgba(24,24,66,.35) 100%)}
+.hero__kicker,.hero__proof{opacity:1;font-size:14px}
+.bank__note,.end__sub,.ft__legal,.ft__credit{opacity:.85;font-size:14px}
+.bank__feel{color:#fff}
+.bank__pre{color:#fff}
+.step p{font-size:var(--t-h3)!important;max-width:30ch}
+.end .h2 span{opacity:.85}
+.end__scene p{font-size:clamp(22px, 18px + 1vw, 32px)!important;max-width:40ch}
+.form label span{font-size:14px;opacity:.9}
+.chap{font-size:14px}
+/* חשיפה עדינה בלי טקסט שקוף-למחצה לזמן ארוך */
+.rv-s{transform:translateY(24px)}.rv-s{transition:opacity .6s var(--ease),transform .8s var(--ease)}
