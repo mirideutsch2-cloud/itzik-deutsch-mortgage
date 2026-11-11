@@ -10,12 +10,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;300;400;500;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/hero.webp">
-<link rel="stylesheet" href="v9.css?v=12">
-<link rel="stylesheet" href="order.css?v=12">
-<link rel="stylesheet" href="read.css?v=12">
-<link rel="stylesheet" href="magic.css?v=12">
-<script defer src="magic.js?v=12"></script>
-<script defer src="v9.js?v=12"></script>
+<link rel="stylesheet" href="v9.css?v=13">
+<link rel="stylesheet" href="order.css?v=13">
+<link rel="stylesheet" href="read.css?v=13">
+<link rel="stylesheet" href="magic.css?v=13">
+<script defer src="magic.js?v=13"></script>
+<link rel="stylesheet" href="anim.css?v=13">
+<link rel="stylesheet" href="quest.css?v=13">
+<script defer src="quest.js?v=13"></script>
+<script defer src="anim.js?v=13"></script>
+<script defer src="v9.js?v=13"></script>
 </head>
 <body>
 <a class="skip" href="#main">דילוג לתוכן</a>
@@ -23,11 +27,43 @@
 <header class="hd" id="hd">
   <a class="hd__brand" href="#top" aria-label="איציק דייטש — לראש העמוד"><img src="../logo-light.png" alt="" width="52" height="30"><span>איציק דייטש</span></a>
   <nav class="hd__nav" aria-label="פרקים">
-    <a href="#ch-bank">הבנק</a><a href="#ch-me">איציק</a><a href="#ch-road">הדרך</a><a href="#ch-end">הסוף הטוב</a>
+    <i class="hd__ind" aria-hidden="true"></i>
+    <a href="#ch-home" data-sec="ch-home">הבית</a><a href="#ch-bank" data-sec="ch-bank">הבנק</a><a href="#ch-me" data-sec="ch-me">איציק</a><a href="#ch-road" data-sec="ch-road">הדרך</a><a href="#ch-end" data-sec="ch-end">הסוף הטוב</a>
   </nav>
-  <a class="btn btn--sm" href="#contact">לשיחת היכרות</a>
+  <button class="hd__quest" type="button" aria-haspopup="dialog" aria-controls="questPanel" aria-label="המשימות שלכם: 0 מתוך 3">
+    <span class="hd__keys"><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i><i class="k"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12 12h9M18 12v3M21 12v2.2"/></svg></i></span><span class="hd__qt"><b id="qCount">0</b>/3</span>
+  </button>
+  <a class="btn btn--sm hd__cta" href="#contact"><span class="hd__save" aria-hidden="true"><b>₪<span id="hdSave">0</span></b> מחכים לכם</span><span class="hd__cta-t">לשיחת היכרות</span></a>
+  <i class="hd__prog" aria-hidden="true"><i id="hdProg"></i></i>
   <button class="hd__menu" type="button" aria-expanded="false" aria-controls="mnav" aria-label="תפריט"><i></i><i></i></button>
 </header>
+<div class="qpanel" id="questPanel" hidden>
+  <p class="qpanel__t">3 מפתחות = <b>דו״ח חיסכון אישי</b> עם המספרים שלכם</p>
+  <ol class="qpanel__list">
+    <li data-q="m1"><a href="#ch-bank"><span class="qi"></span>שנו את המספרים בפרק הבנק</a></li>
+    <li data-q="m2"><a href="#ch-magic"><span class="qi"></span>הפעילו את הקסם של איציק</a></li>
+    <li data-q="m3"><a href="#ch-road"><span class="qi"></span>ספרו לנו מה המצב שלכם</a></li>
+  </ol>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog class="report" id="report" aria-labelledby="rTitle">
+  <form method="dialog"><button class="report__x" aria-label="סגירה">×</button></form>
+  <p class="report__kicker">3 מתוך 3 · פתחתם את הדו״ח</p>
+  <h2 id="rTitle" class="report__t">הדו״ח האישי שלכם</h2>
+  <dl class="report__grid">
+    <div><dt>המצב שלכם</dt><dd id="rSit">—</dd></div>
+    <div><dt>משכנתא</dt><dd id="rLoan">—</dd></div>
+    <div><dt>ההצעה הרגילה של הבנק, ריבית כוללת</dt><dd id="rBank">—</dd></div>
+    <div><dt>תמהיל לדוגמה, ריבית כוללת</dt><dd id="rMix">—</dd></div>
+    <div class="report__big"><dt>יכול להישאר אצלכם</dt><dd id="rSave">—</dd></div>
+    <div><dt>פחות בכל חודש</dt><dd id="rMonth">—</dd></div>
+  </dl>
+  <p class="report__note">הערכה להמחשה לפי מה שבחרתם באתר. התמהיל האמיתי נבנה בשיחה.</p>
+  <div class="report__cta">
+    <a class="btn" id="rWa" href="https://wa.me/972500000000" target="_blank" rel="noopener">שלחו את הדו״ח לאיציק בוואטסאפ <span class="arr" aria-hidden="true">←</span></a>
+    <button class="btn btn--line" type="button" id="rPrint">שמירה כ-PDF</button>
+  </div>
+</dialog>
 <nav class="mnav" id="mnav" aria-label="תפריט" hidden>
   <a href="#ch-bank"><span>02</span>הבנק</a><a href="#ch-me"><span>03</span>איציק</a><a href="#ch-road"><span>04</span>הדרך</a><a href="#ch-end"><span>05</span>הסוף הטוב</a><a href="#contact"><span>06</span>שיחת היכרות</a>
 </nav>
@@ -148,7 +184,10 @@
 <!-- פרק 4 · הדרך (רצועה אופקית) -->
 <section class="road" id="ch-road" aria-labelledby="t-road">
   <div class="road__pin">
-    <div class="road__head"><div class="chap"><span class="chap__no">04</span><span class="chap__name">הדרך</span></div><h2 id="t-road" class="h2">ארבעה צעדים עד המפתח.</h2></div>
+    <div class="road__head"><div class="chap"><span class="chap__no">04</span><span class="chap__name">הדרך</span></div><h2 id="t-road" class="h2">ארבעה צעדים עד המפתח.</h2>
+      <div class="quiz" role="group" aria-labelledby="quizT"><span id="quizT" class="quiz__t">מה המצב שלכם?</span>
+        <button type="button" data-sit="first">דירה ראשונה</button><button type="button" data-sit="upgrade">משפרי דיור</button><button type="button" data-sit="refi">מחזור משכנתא</button>
+      </div></div>
     <ol class="road__track" id="track">
       <li class="step"><span class="step__n">01</span><h3>שיחה</h3><p>חצי שעה. מה אתם קונים, כמה יש, מה מפחיד אתכם. בלי התחייבות.</p></li>
       <li class="step"><span class="step__n">02</span><h3>תמהיל</h3><p>בונה לכם שלושה מסלולים. אתם רואים בדיוק כמה כל אחד עולה — עד השקל.</p></li>

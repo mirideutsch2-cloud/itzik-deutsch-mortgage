@@ -1,0 +1,78 @@
+/* משחק: 3 מפתחות → דו״ח חיסכון אישי */
+
+/* מפתחות בהדר */
+.hd__quest{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:rgba(255,255,255,.12);color:inherit;font:500 14px var(--f);cursor:pointer;transition:background .4s var(--e)}
+.hd.is-light .hd__quest{background:rgba(24,24,66,.06)}
+.hd__quest:hover{background:rgba(255,255,255,.2)}
+.hd__keys{display:flex;gap:2px}
+.hd__keys .k svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;opacity:.45;transition:opacity .4s,stroke .4s}
+.hd__keys .k.on svg{opacity:1;stroke:var(--acc-l);animation:keyPop .8s cubic-bezier(.3,1.7,.5,1)}
+.hd__keys .k.on circle{fill:var(--acc-l)}
+@keyframes keyPop{0%{transform:scale(.4) rotate(-40deg)}60%{transform:scale(1.35) rotate(8deg)}100%{transform:none}}
+.hd__qt{font-variant-numeric:tabular-nums}
+.hd.is-done .hd__quest{background:var(--acc);color:#fff}
+.hd.is-done .hd__keys .k svg{stroke:#fff}.hd.is-done .hd__keys .k circle{fill:#fff}
+
+/* פאנל המשימות */
+.qpanel{position:fixed;top:78px;inset-inline-end:var(--gut);z-index:49;width:min(360px, calc(100vw - 32px));background:#fff;color:var(--ink);border-radius:20px;padding:20px;box-shadow:0 20px 40px rgba(24,24,66,.18)}
+.qpanel[hidden]{display:none}
+.qpanel__t{font-size:15px;margin-bottom:12px}
+.qpanel__t b{color:var(--acc)}
+.qpanel__list{display:grid;gap:4px}
+.qpanel__list a{display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 10px;border-radius:12px;text-decoration:none;font-size:16px}
+.qpanel__list a:hover{background:var(--paper)}
+.qi{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center}
+.qpanel__list li.done a{color:var(--mute)}
+.qpanel__list li.done .qi{background:var(--acc);border-color:var(--acc)}
+.qpanel__list li.done .qi::after{content:"✓";color:#fff;font-size:13px}
+
+/* הודעת "קיבלתם מפתח" */
+.toast{position:fixed;bottom:24px;left:50%;z-index:60;transform:translate(-50%, 140%);background:var(--ink);color:#fff;border-radius:999px;padding:14px 22px;font-size:16px;display:flex;gap:10px;align-items:center;box-shadow:0 14px 30px rgba(24,24,66,.3);transition:transform .7s cubic-bezier(.3,1.5,.5,1);white-space:nowrap;max-width:calc(100vw - 32px)}
+.toast.show{transform:translate(-50%, 0)}
+.toast b{color:var(--acc-l)}
+
+/* שאלון המצב */
+.quiz{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px}
+.quiz__t{font-size:16px;font-weight:500;margin-inline-end:6px}
+.quiz button{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font:400 15px var(--f);cursor:pointer;transition:background .35s var(--e),color .35s,border-color .35s,transform .35s var(--e)}
+.quiz button:hover{border-color:var(--ink)}
+.quiz button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);transform:scale(1.04)}
+.step p{transition:opacity .4s var(--e)}
+.step p.swap{opacity:0}
+
+/* הדו״ח — הפרס */
+.report{border:0;padding:clamp(24px, 4vw, 48px);border-radius:24px;width:min(720px, calc(100vw - 32px));max-height:calc(100svh - 32px);color:var(--ink);background:#fff;box-shadow:0 30px 80px rgba(24,24,66,.35)}
+.report::backdrop{background:rgba(24,24,66,.55);backdrop-filter:blur(6px)}
+.report[open]{animation:repIn .7s cubic-bezier(.3,1.4,.5,1)}
+@keyframes repIn{from{transform:translateY(40px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+.report__x{position:absolute;top:14px;inset-inline-end:14px;width:44px;height:44px;border-radius:50%;border:0;background:var(--paper);font-size:24px;cursor:pointer;color:var(--ink)}
+.report__kicker{font-size:14px;color:var(--acc);font-weight:500}
+.report__t{font-size:clamp(30px, 4vw, 48px);font-weight:300;line-height:1.05;margin:8px 0 24px}
+.report__grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;margin:0;padding:20px 0;border-block:1px solid var(--line)}
+.report__grid dt{font-size:14px;color:var(--mute)}
+.report__grid dd{margin:4px 0 0;font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.report__big{grid-column:1 / -1;background:var(--acc);color:#fff;border-radius:16px;padding:18px 20px}
+.report__big dt{color:rgba(255,255,255,.9)}
+.report__big dd{font-size:clamp(40px, 6vw, 64px);font-weight:300;line-height:1}
+.report__note{font-size:14px;color:var(--mute);margin:14px 0 20px}
+.report__cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn--line{background:transparent;color:var(--ink);border:1px solid var(--line);padding-inline:22px}
+.btn--line:hover{background:var(--paper)}
+
+/* חגיגה קטנה כשנפתח הפרס */
+.burst{position:fixed;z-index:70;pointer-events:none;width:10px;height:10px;border-radius:2px}
+
+@media (max-width: 900px){
+  .hd__qt{display:none}
+  .hd__quest{padding:0 10px}
+  .hd__keys .k svg{width:15px;height:15px}
+  .qpanel{top:72px}
+  .report__grid{grid-template-columns:1fr}
+}
+@media (max-width: 420px){ .hd__brand span{display:none} }
+@media print{
+  body > *:not(.report){display:none!important}
+  .report{position:static;box-shadow:none;width:auto;max-height:none}
+  .report__x,.report__cta{display:none}
+}
+@media (max-width: 900px){ .toast{bottom:92px} }

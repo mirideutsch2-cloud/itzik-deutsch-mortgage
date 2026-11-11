@@ -1,0 +1,57 @@
+/* תנועה + הדר חכם (2026-11-11). משפחה אחת: אותה האטה, 0.9–1.2s, תזוזות קטנות */
+:root{--e:cubic-bezier(.22,1,.36,1)}
+
+/* ── הדר חכם ── */
+.hd{overflow:hidden}
+.hd__nav{position:relative}
+.hd__ind{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:999px;background:rgba(255,255,255,.16);transition:transform .6s var(--e),width .6s var(--e),opacity .3s;opacity:0;pointer-events:none}
+.hd.is-light .hd__ind{background:rgba(24,24,66,.08)}
+.hd__nav a{position:relative;z-index:1;transition:opacity .3s}
+.hd__nav a.is-on{opacity:1;font-weight:500}
+.hd__prog{position:absolute;inset-inline:22px;bottom:0;height:2px;border-radius:2px;overflow:hidden;pointer-events:none}
+.hd__prog i{display:block;height:100%;width:100%;background:var(--acc-l);transform-origin:right;transform:scaleX(0)}
+/* כפתור שהופך לאישי אחרי שהגולש חישב */
+.hd__cta{position:relative;overflow:hidden;display:inline-grid!important;place-items:center}
+.hd__cta > span{grid-area:1 / 1;transition:transform .7s var(--e),opacity .5s var(--e);white-space:nowrap}
+.hd__save{transform:translateY(120%);opacity:0;font-weight:400}
+.hd__save b{font-weight:700}
+.hd.is-personal .hd__save{transform:none;opacity:1}
+.hd.is-personal .hd__cta-t{transform:translateY(-120%);opacity:0}
+.hd.is-personal .hd__cta{animation:ctaPop .9s cubic-bezier(.3,1.6,.5,1)}
+@keyframes ctaPop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+.hd.is-personal .hd__cta:hover .hd__save{transform:translateY(-120%);opacity:0}
+.hd.is-personal .hd__cta:hover .hd__cta-t{transform:none;opacity:1}
+
+/* ── תנועה ── (רק כשיש JS) */
+.js-anim .a-lines .ln{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.js-anim .a-lines .ln > span{display:inline-block;transform:translateY(105%);transition:transform 1.1s var(--e)}
+.js-anim .a-lines.in .ln > span{transform:none}
+.js-anim .a-lines.in .ln:nth-child(2) > span{transition-delay:.09s}
+.js-anim .a-lines.in .ln:nth-child(3) > span{transition-delay:.18s}
+
+.js-anim .a-img{clip-path:inset(14% 0 0 0 round var(--r));transition:clip-path 1.3s var(--e)}
+.js-anim .a-img img{transform:scale(1.14);transition:transform 1.8s var(--e)}
+.js-anim .a-img.in{clip-path:inset(0 0 0 0 round var(--r))}
+.js-anim .a-img.in img{transform:scale(1.03)}
+
+.js-anim .chap{border-top-color:transparent;position:relative}
+.js-anim .chap::before{content:"";position:absolute;top:-1px;right:0;height:1px;width:100%;background:var(--line);transform:scaleX(0);transform-origin:right;transition:transform 1.2s var(--e)}
+.js-anim .bank .chap::before,.js-anim .invite .chap::before,.js-anim .end .chap::before{background:rgba(255,255,255,.25)}
+.js-anim .chap.in::before{transform:none}
+.js-anim .chap > span{opacity:0;transform:translateY(8px);transition:opacity .6s var(--e) .25s,transform .8s var(--e) .25s}
+.js-anim .chap.in > span{opacity:1;transform:none}
+
+.js-anim .a-up{opacity:0;transform:translateY(22px);transition:opacity .6s var(--e),transform .9s var(--e)}
+.js-anim .a-up.in{opacity:1;transform:none}
+
+/* שלבי הדרך נכנסים כשהרצועה זזה */
+.step{transition:transform .9s var(--e)}
+.js-anim .step:not(.seen){transform:translateY(28px) scale(.97)}
+
+.hero__img{will-change:transform}
+
+@media (prefers-reduced-motion: reduce){
+  .js-anim .a-lines .ln > span,.js-anim .a-img,.js-anim .a-img img,.js-anim .chap > span,.js-anim .a-up,.js-anim .step{transform:none!important;opacity:1!important;clip-path:none!important;transition:none!important}
+  .js-anim .chap::before{transform:none}
+}
+@media (max-width: 900px){ .hd__prog{inset-inline:18px} }
