@@ -35,6 +35,7 @@
     $('#vYrs').textContent = iYrs.value + ' שנה'; $('#oYrs').textContent = iYrs.value;
     $('#vRate').textContent = (+iRate.value).toFixed(1) + '%';
     $('#saveNum').textContent = fmt(Math.round(save / 1000) * 1000);
+    $('#waitNum').textContent = fmt(pay - pay2);
     paintBank();
   }
   function paintBank() {
@@ -54,7 +55,7 @@
     road.style.height = (innerHeight + Math.max(0, dist)) + 'px';
   }
 
-  const bank = $('.bank');
+  const bank = $('.bank__scroll');
   let ticking = false;
   function onScroll() {
     ticking = false; headerTone();
@@ -75,11 +76,18 @@
 
   // פרק 5 — ציטוט אחד בכל פעם
   const qs = $$('.q'); let qi = 0;
-  $('.quotes__nav').addEventListener('click', e => {
+  $('.quotes__nav') && $('.quotes__nav').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     qs[qi].classList.remove('is-on'); qi = (qi + +b.dataset.q + qs.length) % qs.length; qs[qi].classList.add('is-on');
     $('#qi').textContent = (qi + 1) + ' / ' + qs.length;
   });
+
+  // תפריט מובייל
+  const mb = $('.hd__menu'), mn = $('#mnav');
+  const setMenu = open => { mb.setAttribute('aria-expanded', open); mn.hidden = !open; document.body.style.overflow = open ? 'hidden' : ''; };
+  mb.addEventListener('click', () => setMenu(mn.hidden));
+  mn.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !mn.hidden) { setMenu(false); mb.focus(); } });
 
   calc(); sizeRoad(); onScroll();
   addEventListener('load', () => { sizeRoad(); onScroll(); });
