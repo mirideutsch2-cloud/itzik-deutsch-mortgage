@@ -9,22 +9,22 @@
 <link rel="icon" href="../favicon.ico" sizes="any"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="../v10/img/itzik.webp">
-<link rel="stylesheet" href="site.css?v=1">
-<script defer src="site.js?v=1"></script>
+<link rel="preload" as="image" href="img/itzik-cut.webp">
+<link rel="stylesheet" href="site.css?v=2">
+<script defer src="site.js?v=2"></script>
 </head>
 <body>
 <a class="skip" href="#main">דילוג לתוכן</a>
 
-<header class="hd" id="hd">
+<header class="hd" id="hd"><div class="hd__cap">
   <a class="hd__brand" href="#top" aria-label="איציק דייטש — לראש העמוד"><img class="hd__logo hd__logo--l" src="../logo-light.png" alt="" width="54" height="30"><img class="hd__logo hd__logo--d" src="../logo.png" alt="" width="54" height="30"><span>איציק דייטש<small>ייעוץ משכנתאות</small></span></a>
-  <nav class="hd__nav" aria-label="ראשי"><a href="#bank">כמה זה עולה</a><a href="#pen">מה אני מסמן</a><a href="#how">איך זה עובד</a><a href="#me">מי אני</a></nav>
+  <nav class="hd__nav" aria-label="ראשי"><i class="hd__ind" aria-hidden="true"></i><a href="#bank">כמה זה עולה</a><a href="#pen">מה אני מסמן</a><a href="#how">איך זה עובד</a><a href="#me">מי אני</a></nav>
   <div class="hd__end">
     <a class="hd__tel" href="tel:+972500000000"><bdi dir="ltr">050-000-0000</bdi></a>
     <a class="btn btn--sm" href="#send">שלחו לי את ההצעה</a>
     <button class="hd__menu" type="button" aria-expanded="false" aria-controls="mnav" aria-label="תפריט"><i></i><i></i></button>
   </div>
-</header>
+</div></header>
 <nav class="mnav" id="mnav" aria-label="תפריט" hidden>
   <a href="#bank">כמה זה עולה</a><a href="#pen">מה אני מסמן</a><a href="#how">איך זה עובד</a><a href="#me">מי אני</a><a href="#send">שלחו לי את ההצעה</a>
   <a class="mnav__tel" href="tel:+972500000000"><bdi dir="ltr">050-000-0000</bdi></a>
@@ -40,7 +40,7 @@
     <p class="a__sub">הפעם <b>גם אתם.</b> אני עובר על ההצעה שקיבלתם מהבנק בעט אדום, ויושב מולם עד שהיא משתפרת.</p>
     <div class="cta-row"><a class="btn" href="#send">שלחו לי את ההצעה בוואטסאפ</a><a class="link" href="#send">או שיחה של 20 דקות</a></div>
   </div>
-  <figure class="a__photo"><img src="../v10/img/itzik.webp" alt="איציק דייטש, יועץ משכנתאות" width="1200" height="1600"><figcaption class="note">לא עובד בשביל אף בנק</figcaption></figure>
+  <figure class="a__photo"><img src="img/itzik-cut.webp" alt="איציק דייטש, יועץ משכנתאות" width="961" height="1500"><figcaption class="note">לא עובד בשביל אף בנק</figcaption></figure>
 </section>
 
 <!-- 2 · המספר (כיוון ב׳) -->
@@ -53,6 +53,12 @@
   </div>
   <div class="tape" aria-hidden="true"><div><span>פריים פלוס</span><span>עמלת פתיחת תיק</span><span>שליש שליש שליש</span><span>ביטוח מבנה דרך הבנק</span><span>משתנה צמודה</span><span>פריים פלוס</span><span>עמלת פתיחת תיק</span><span>שליש שליש שליש</span><span>ביטוח מבנה דרך הבנק</span><span>משתנה צמודה</span></div></div>
   <p class="b__note">חישוב לפי לוח שפיצר, ריבית ממוצעת 4.6%, להמחשה.</p>
+</section>
+
+<!-- 2ב · תמונת אווירה -->
+<section class="sec band" aria-label="תמונת אווירה">
+  <img class="band__img" src="img/a-building.webp" alt="בניין מגורים חדש מאבן ירושלמית בשעת שקיעה" loading="lazy" width="1800" height="1007">
+  <p class="band__t">בסוף, זה הבית שלכם.<br>לא של הבנק.</p>
 </section>
 
 <!-- 3 · ההצעה בתלת-ממד (כיוון ג׳, רקע חדש: במה כהה עם אור על המסמך) -->
@@ -84,7 +90,7 @@
 
 <!-- 4 · איך זה עובד -->
 <section class="sec how" id="how" aria-labelledby="t-how">
-  <h2 class="big" id="t-how">שלושה צעדים.<br>אתם עושים רק את הראשון.</h2>
+  <div class="how__head"><h2 class="big" id="t-how">שלושה צעדים.<br>אתם עושים רק את הראשון.</h2><figure class="how__img"><img src="img/a-door.webp" alt="דלת של דירה חדשה עם מזוזה ומפתחות בחור המנעול" loading="lazy" width="1100" height="1460"></figure></div>
   <ol class="steps">
     <li><span class="steps__n">01</span><h3>שולחים לי צילום של ההצעה</h3><p>בוואטסאפ, כמו שהיא. יש לכם כמה הצעות מכמה בנקים? שלחו את כולן.</p></li>
     <li><span class="steps__n">02</span><h3>אני מסמן מה אפשר לשפר</h3><p>אתם מקבלים אותה בחזרה עם הערות בעט אדום, ושיחה של 20 דקות כדי להסביר.</p></li>
@@ -110,6 +116,7 @@
 
 <!-- 6 · שליחה -->
 <section class="sec send" id="send" aria-labelledby="t-send">
+  <img class="send__bg" src="img/a-room.webp" alt="" loading="lazy" width="1600" height="1075">
   <div class="send__copy">
     <h2 class="send__t" id="t-send">רוצים שאעבור<br>גם על <span class="pw">שלכם<svg viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 20 C 60 10, 140 24, 200 14 S 280 12, 296 18"/></svg></span>?</h2>
     <p>צלמו את ההצעה ושלחו לי בוואטסאפ. אחזור אליכם עם הסימונים שלי ונקבע שיחה של 20 דקות. בלי התחייבות.</p>

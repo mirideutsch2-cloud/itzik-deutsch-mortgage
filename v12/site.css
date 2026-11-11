@@ -180,3 +180,58 @@ a{color:inherit}
   .tape div{animation:none}
 }
 @media (max-width: 980px){ .b{padding-bottom:170px} .tape{bottom:64px} .b__note{bottom:18px} }
+
+/* ── סבב: חיתוך + אווירה + הדר מודרני + קריאות ── */
+/* הדר: קפסולה צפה */
+.hd{padding:14px var(--gut)!important;background:none!important;box-shadow:none!important;justify-content:center}
+.hd__cap{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;max-width:1240px;padding:8px 8px 8px 8px;padding-inline-start:18px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);transition:background .4s,border-color .4s,box-shadow .4s}
+.hd.is-solid .hd__cap{background:rgba(255,255,255,.88);border-color:rgba(20,20,58,.08);box-shadow:0 10px 30px rgba(20,20,58,.08)}
+.hd__nav{position:relative}
+.hd__ind{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:999px;background:rgba(255,255,255,.14);opacity:0;transition:transform .55s var(--e),width .55s var(--e),opacity .3s;pointer-events:none}
+.hd.is-solid .hd__ind{background:rgba(20,20,58,.07)}
+.hd__nav a{position:relative;z-index:1;border-radius:999px;padding:10px 14px}
+.hd__nav a:hover{background:none}
+.hd .btn--sm{border-radius:999px}
+.hd__menu{border-radius:999px}
+
+/* פתיחה: איציק חתוך, נכנס לתוך הכותרת */
+.a{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);align-items:end;padding-bottom:0;background:radial-gradient(ellipse 45% 70% at 22% 70%, #2A2A6C 0%, rgba(42,42,108,0) 70%), var(--navy)}
+.a__copy{align-self:center;padding-bottom:70px;position:relative;z-index:2}
+.a__photo{transform:none;align-self:end;margin-inline-start:-8vw;position:relative;z-index:1}
+.a__photo img{border-radius:0;aspect-ratio:auto;object-fit:contain;width:100%;max-height:calc(100svh - 90px);height:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.35))}
+.note{bottom:auto;top:32%;inset-inline-end:auto;inset-inline-start:2%}
+.a__sub{color:#fff;font-size:clamp(20px, 1.7vw, 26px)}
+
+/* קריאות */
+.b__p{color:#33344F}
+.b__pre{color:#33344F}
+.c__p{color:#ECECF6}
+.c__list li{font-size:18px}
+.steps p{color:#3A3B57;font-size:17px}
+.me__copy p{color:#26273F}
+.send__copy p{color:#F0F0F6}
+
+/* פס אווירה */
+.band{position:relative;height:clamp(420px, 78svh, 760px);display:grid;align-items:end;color:#fff}
+.band__img{position:absolute;inset:-8% 0;width:100%;height:116%;object-fit:cover;will-change:transform}
+.band::after{content:"";position:absolute;inset:0;background:linear-gradient(to top, rgba(12,12,38,.78) 0%, rgba(12,12,38,.2) 45%, rgba(12,12,38,0) 70%)}
+.band__t{position:relative;z-index:1;font:700 clamp(54px, 7vw, 120px)/.86 var(--d);padding:0 var(--gut) clamp(40px, 8vh, 80px)}
+
+/* איך זה עובד: כותרת + תמונת דלת */
+.how__head{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:clamp(24px, 4vw, 64px);align-items:end}
+.how__img img{border-radius:22px;aspect-ratio:4 / 5;object-fit:cover;width:100%;max-height:420px}
+
+/* שליחה: חדר ריק מאחור */
+.send__bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:luminosity}
+.send > *:not(.send__bg){position:relative;z-index:1}
+
+@media (max-width: 980px){
+  .a{grid-template-columns:1fr;padding-bottom:0}
+  .a__copy{padding-bottom:10px}
+  .a__photo{margin:0 auto;max-width:330px}
+  .a__photo img{max-height:56svh}
+  .note{top:auto;bottom:24px}
+  .how__head{grid-template-columns:1fr}
+  .how__img img{max-height:300px;aspect-ratio:16 / 10}
+  .hd{padding:10px 12px!important}
+}

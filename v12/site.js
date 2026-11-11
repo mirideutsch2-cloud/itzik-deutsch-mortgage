@@ -18,7 +18,22 @@
     const y = 40; const onDark = dark.some(el => { const r = el.getBoundingClientRect(); return r.top <= y && r.bottom > y; });
     hd.classList.toggle('is-solid', !onDark);
   }
-  addEventListener('scroll', () => requestAnimationFrame(tone), { passive: true }); tone();
+  // מחוון שגולש לפרק הפעיל
+  const nav = $('.hd__nav'), ind = $('.hd__ind'), links = $$('.hd__nav a');
+  const secs = links.map(a => document.querySelector(a.getAttribute('href')));
+  let active = null;
+  function spy() {
+    const y = innerHeight * .4; let cur = null;
+    secs.forEach((s, i) => { if (!s) return; const r = s.getBoundingClientRect(); if (r.top <= y && r.bottom > y) cur = links[i]; });
+    if (cur === active) return; active = cur;
+    if (!cur || !nav.offsetWidth) { ind.style.opacity = 0; return; }
+    const nr = nav.getBoundingClientRect(), r = cur.getBoundingClientRect();
+    ind.style.width = r.width + 'px'; ind.style.transform = `translateX(${r.left - nr.left}px)`; ind.style.opacity = 1;
+  }
+  // פרלקסה עדינה בפס האווירה
+  const band = $('.band__img');
+  function par() { if (!band || reduce) return; const r = band.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; band.style.transform = `translateY(${(r.top / innerHeight) * -40}px)`; }
+  addEventListener('scroll', () => requestAnimationFrame(() => { tone(); spy(); par(); }), { passive: true }); tone(); spy();
 
   // תפריט מובייל
   const mb = $('.hd__menu'), mn = $('#mnav');
@@ -37,5 +52,5 @@
   c.addEventListener('pointerleave', () => sheet.style.transform = '');
   // התמונה בפתיחה זזה קלות
   const a = $('.a'), ph = $('.a__photo');
-  a.addEventListener('pointermove', e => { const r = a.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; ph.style.transform = `rotate(2deg) translate(${x * -18}px, ${y * -14}px)`; });
+  a.addEventListener('pointermove', e => { const r = a.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5; ph.style.transform = `translateX(${x * -14}px)`; });
 })();
