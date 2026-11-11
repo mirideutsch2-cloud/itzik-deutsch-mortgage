@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>איציק דייטש — ייעוץ משכנתאות · גרסה 9 (סיפור)</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="איציק דייטש, יועץ משכנתאות עצמאי. הבנק תמיד מרוויח — הפעם גם אתם.">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;400;700&family=Frank+Ruhl+Libre:wght@300;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/hero.webp">
+<link rel="stylesheet" href="v9.css">
+<script defer src="v9.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">דילוג לתוכן</a>
+
+<header class="hd" id="hd">
+  <a class="hd__brand" href="#top" aria-label="איציק דייטש — לראש העמוד"><img src="../logo-light.png" alt="" width="52" height="30"><span>איציק דייטש</span></a>
+  <nav class="hd__nav" aria-label="פרקים">
+    <a href="#ch-bank">הבנק</a><a href="#ch-me">איציק</a><a href="#ch-road">הדרך</a><a href="#ch-end">הסוף הטוב</a>
+  </nav>
+  <a class="btn btn--sm" href="#contact">לשיחת היכרות</a>
+</header>
+
+<main id="main">
+
+<!-- פרק 0 · הפתיחה -->
+<section class="hero" id="top" aria-label="פתיחה">
+  <img class="hero__img" src="img/hero.webp" alt="מרפסות מעוגלות של בניין באוהאוס בתל אביב, בשחור-לבן" width="1920" height="2891">
+  <div class="hero__shade" aria-hidden="true"></div>
+  <p class="hero__kicker micro">איציק דייטש · יועץ משכנתאות עצמאי</p>
+  <h1 class="hero__title">
+    <span class="hero__l1">הבנק תמיד</span>
+    <span class="hero__l2">מרוויח.</span>
+    <span class="hero__l3">הפעם <em>גם אתם.</em></span>
+  </h1>
+  <div class="hero__cta">
+    <p>אני בונה לכם תמהיל משכנתא שמקטין את החלק של הבנק — ומגדיל את החלק שלכם.</p>
+    <a class="btn" href="#contact">לשיחת היכרות חינם <span class="arr" aria-hidden="true">←</span></a>
+  </div>
+  <ul class="hero__proof" aria-label="למה איציק">
+    <li><b>ללא</b> עמלת בנק</li><li><b>שיחה ראשונה</b> חינם</li><li><b>אני</b> עובד בשבילכם</li>
+  </ul>
+  <a class="hero__cue" href="#ch-home" aria-label="להמשך הסיפור"><span>הסיפור מתחיל</span><i aria-hidden="true"></i></a>
+</section>
+
+<!-- פרק 1 · הבית -->
+<section class="home" id="ch-home" aria-labelledby="t-home">
+  <span class="giant giant--home" aria-hidden="true">בית.</span>
+  <figure class="home__img"><img src="img/balconies.webp" alt="מרפסות עגולות בבניין מגורים לבן בתל אביב" loading="lazy" width="1600" height="2400"></figure>
+  <div class="home__copy">
+    <span class="ch-no">פרק 01</span>
+    <h2 id="t-home" class="h2">מצאתם אותו.</h2>
+    <p class="lead">שנים חסכתם. ראיתם עשרות דירות. ואז — זאת. המרפסת, האור, הרחוב. נשאר רק דבר אחד לסגור: <strong>הכסף.</strong></p>
+  </div>
+</section>
+
+<!-- פרק 2 · הבנק (חוויה: המספר שלכם) -->
+<section class="bank" id="ch-bank" aria-labelledby="t-bank">
+  <div class="bank__pin">
+    <div class="bank__top">
+      <span class="ch-no">פרק 02</span>
+      <h2 id="t-bank" class="h2">ואז נכנסתם לבנק.</h2>
+    </div>
+    <div class="bank__stage">
+      <p class="bank__pre">על משכנתא של <output id="oAmt">₪1,200,000</output> ל־<output id="oYrs">25</output> שנה, הבנק ירוויח מכם</p>
+      <p class="bank__num" aria-live="polite"><span class="cur">₪</span><span id="bankNum">821,485</span></p>
+      <div class="bank__bars" aria-hidden="true">
+        <div class="bar bar--home"><i id="barHome"></i><span>הבית שלכם</span></div>
+        <div class="bar bar--bank"><i id="barBank"></i><span>הרווח של הבנק</span></div>
+      </div>
+    </div>
+    <form class="bank__ctrl" aria-label="שנו את המספרים שלכם" onsubmit="return false">
+      <label>סכום המשכנתא<output id="vAmt">₪1,200,000</output><input id="iAmt" type="range" min="300000" max="3000000" step="50000" value="1200000"></label>
+      <label>תקופה<output id="vYrs">25 שנה</output><input id="iYrs" type="range" min="5" max="30" step="1" value="25"></label>
+      <label>ריבית ממוצעת<output id="vRate">4.6%</output><input id="iRate" type="range" min="2" max="7" step="0.1" value="4.6"></label>
+    </form>
+    <p class="bank__note">חישוב לפי לוח שפיצר וריבית קבועה, להמחשה בלבד. בלי הצמדה ועמלות.</p>
+  </div>
+</section>
+
+<!-- פרק 3 · נקודת המפנה -->
+<section class="me" id="ch-me" aria-labelledby="t-me">
+  <span class="me__mark" aria-hidden="true">״</span>
+  <div class="me__copy">
+    <span class="ch-no">פרק 03</span>
+    <h2 id="t-me" class="me__quote">הבנק מכיר את המספרים.<br><em>אני מכיר את הבנק.</em></h2>
+    <div class="me__sig"><b>איציק דייטש</b><span>יועץ משכנתאות עצמאי · לא שייך לאף בנק</span></div>
+  </div>
+  <figure class="me__img"><img src="img/tree.webp" alt="בניין לבן בין עצי אורן" loading="lazy" width="1400" height="2100"></figure>
+  <ul class="me__facts">
+    <li><b>0</b><span>עמלות מהבנק — אני מקבל שכר רק מכם</span></li>
+    <li><b>3</b><span>בנקים לפחות מתחרים על כל תיק</span></li>
+    <li><b>1</b><span>איש קשר מהשיחה הראשונה ועד המפתח</span></li>
+  </ul>
+</section>
+
+<!-- פרק 4 · הדרך (רצועה אופקית) -->
+<section class="road" id="ch-road" aria-labelledby="t-road">
+  <div class="road__pin">
+    <div class="road__head"><span class="ch-no">פרק 04</span><h2 id="t-road" class="h2">ארבעה צעדים עד המפתח.</h2></div>
+    <ol class="road__track" id="track">
+      <li class="step"><span class="step__n">01</span><h3>שיחה</h3><p>חצי שעה. מה אתם קונים, כמה יש, מה מפחיד אתכם. בלי התחייבות.</p></li>
+      <li class="step step--img"><img src="img/entrance.webp" alt="" loading="lazy"><span class="step__n">02</span><h3>תמהיל</h3><p>בונה לכם שלושה מסלולים. אתם רואים בדיוק כמה כל אחד עולה — עד השקל.</p></li>
+      <li class="step step--dark"><span class="step__n">03</span><h3>מכרז</h3><p>הבנקים מתחרים עליכם, לא להפך. אני מנהל את המו״מ.</p></li>
+      <li class="step step--acc"><span class="step__n">04</span><h3>מפתח</h3><p>חותמים על התנאים הכי טובים שאפשר. ואני נשאר זמין גם אחרי.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- פרק 5 · הסוף הטוב -->
+<section class="end" id="ch-end" aria-labelledby="t-end">
+  <span class="ch-no">פרק 05</span>
+  <p class="end__num" aria-hidden="true">₪<span id="saveNum">99,000</span></p>
+  <h2 id="t-end" class="h2">זה מה שיכול להישאר אצלכם.<br><span>לא אצל הבנק.</span></h2>
+  <p class="end__sub">הערכה לפי המספרים שהזנתם בפרק 02, בתמהיל שחוסך 0.4% ריבית בממוצע.</p>
+  <div class="quotes" id="quotes">
+    <blockquote class="q is-on"><p>״חסכנו כ־99 אלף ש״ח לאורך המשכנתא. אבל מה שבאמת שווה זה שהבנו על מה אנחנו חותמים.״</p><cite>נועה ודניאל · משכנתא ראשונה, חולון</cite></blockquote>
+    <blockquote class="q"><p>״איציק מצא לנו מחזור שהוריד 1,100 ש״ח מההחזר החודשי. שיחה אחת, שלוש פגישות, סגור.״</p><cite>משפחת לוי · מחזור משכנתא</cite></blockquote>
+    <blockquote class="q"><p>״מכרנו וקנינו באותו חודש. בלי איציק היינו נתקעים עם שתי משכנתאות.״</p><cite>רותם · משפרי דיור</cite></blockquote>
+    <div class="quotes__nav"><button type="button" data-q="-1" aria-label="הקודם">→</button><span id="qi">1 / 3</span><button type="button" data-q="1" aria-label="הבא">←</button></div>
+  </div>
+  <p class="end__draft">[ טיוטה — ההמלצות והסכומים ממתינים לאישור מאיציק ]</p>
+</section>
+
+<!-- פרק 6 · ההזמנה -->
+<section class="invite" id="contact" aria-labelledby="t-inv">
+  <img class="invite__img" src="img/hero.webp" alt="" loading="lazy">
+  <div class="invite__in">
+    <span class="ch-no">פרק 06 · שלכם</span>
+    <h2 id="t-inv" class="invite__title">הבית שלכם.<br><em>התנאים שלכם.</em></h2>
+    <form class="form" onsubmit="event.preventDefault();this.classList.add('sent')">
+      <label><span>שם</span><input name="name" autocomplete="name" required></label>
+      <label><span>טלפון</span><input name="tel" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" required></label>
+      <button class="btn" type="submit">שיחת היכרות של 20 דק׳ <span class="arr" aria-hidden="true">←</span></button>
+      <p class="form__ok" role="status">תודה! איציק יחזור אליכם עוד היום.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="ft">
+  <div class="ft__row">
+    <a href="tel:+972500000000" dir="ltr">050-000-0000</a>
+    <a href="https://wa.me/972500000000">וואטסאפ</a>
+    <a href="#">אינסטגרם</a><a href="#">פייסבוק</a>
+  </div>
+  <p class="ft__word" aria-hidden="true">דייטש</p>
+  <div class="ft__legal">
+    <span>© איציק דייטש · עיצוב: מירי דייטש</span>
+    <span><a href="../accessibility.html">נגישות</a> · <a href="../privacy.html">פרטיות</a> · <a href="../terms.html">תנאים</a></span>
+    <span class="ft__credit">צילומים: ויקישיתוף — אריאל מנור (CC BY 2.5), Israel photo gallery (CC BY-SA 2.0), Chenspec (CC BY-SA 4.0) · עובדו לשחור-לבן</span>
+  </div>
+</footer>
+<a class="wa" href="https://wa.me/972500000000" aria-label="וואטסאפ לאיציק"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.6 14.2c-.2.7-1.4 1.3-1.9 1.3-.5.1-1.1.1-1.8-.1a16 16 0 0 1-6.7-5.9c-.5-.8-1.2-2-1.2-3.3 0-1.2.6-1.9.9-2.2.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.1.1.6-.1 1.3Z"/></svg></a>
+</body>
+</html>
