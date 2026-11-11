@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@200;400;700&family=Frank+Ruhl+Libre:wght@300;500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/hero.webp">
 <link rel="stylesheet" href="v9.css">
+<link rel="stylesheet" href="order.css">
 <script defer src="v9.js"></script>
 </head>
 <body>
@@ -52,10 +53,10 @@
 
 <!-- פרק 1 · הבית -->
 <section class="home" id="ch-home" aria-labelledby="t-home">
-  <span class="giant giant--home" aria-hidden="true">בית.</span>
+  <div class="chap"><span class="chap__no">01</span><span class="chap__name">הבית</span></div>
   <figure class="home__img"><img src="img/balconies.webp" alt="מרפסות עגולות בבניין מגורים לבן בתל אביב" loading="lazy" width="1600" height="2400"></figure>
   <div class="home__copy">
-    <span class="ch-no">פרק 01</span>
+    
     <h2 id="t-home" class="h2">מצאתם אותו.</h2>
     <p class="lead">שנים חסכתם. ראיתם עשרות דירות. ואז — זאת. המרפסת, האור, הרחוב. נשאר רק דבר אחד לסגור: <strong>הכסף.</strong></p>
   </div>
@@ -65,8 +66,9 @@
 <section class="bank" id="ch-bank" aria-labelledby="t-bank">
   <div class="bank__scroll">
   <div class="bank__pin">
+    <div class="chap"><span class="chap__no">02</span><span class="chap__name">הבנק</span></div>
     <div class="bank__top">
-      <span class="ch-no">פרק 02</span>
+      
       <h2 id="t-bank" class="h2">ואז נכנסתם לבנק.</h2>
     </div>
     <div class="bank__stage">
@@ -95,9 +97,9 @@
 
 <!-- פרק 3 · נקודת המפנה -->
 <section class="me" id="ch-me" aria-labelledby="t-me">
-  <span class="me__mark" aria-hidden="true">״</span>
+  <div class="chap"><span class="chap__no">03</span><span class="chap__name">איציק</span></div>
   <div class="me__copy">
-    <span class="ch-no">פרק 03</span>
+    
     <h2 id="t-me" class="me__quote">הבנק מכיר את המספרים.<br><em>אני מכיר את הבנק.</em></h2>
     <div class="me__sig"><b>איציק דייטש</b><span>יועץ משכנתאות עצמאי · לא שייך לאף בנק</span></div>
     <div class="me__story">
@@ -117,11 +119,11 @@
 <!-- פרק 4 · הדרך (רצועה אופקית) -->
 <section class="road" id="ch-road" aria-labelledby="t-road">
   <div class="road__pin">
-    <div class="road__head"><span class="ch-no">פרק 04</span><h2 id="t-road" class="h2">ארבעה צעדים עד המפתח.</h2></div>
+    <div class="road__head"><div class="chap"><span class="chap__no">04</span><span class="chap__name">הדרך</span></div><h2 id="t-road" class="h2">ארבעה צעדים עד המפתח.</h2></div>
     <ol class="road__track" id="track">
       <li class="step"><span class="step__n">01</span><h3>שיחה</h3><p>חצי שעה. מה אתם קונים, כמה יש, מה מפחיד אתכם. בלי התחייבות.</p></li>
-      <li class="step step--img"><img src="img/entrance.webp" alt="" loading="lazy"><span class="step__n">02</span><h3>תמהיל</h3><p>בונה לכם שלושה מסלולים. אתם רואים בדיוק כמה כל אחד עולה — עד השקל.</p></li>
-      <li class="step step--dark"><span class="step__n">03</span><h3>מכרז</h3><p>הבנקים מתחרים עליכם, לא להפך. אני מנהל את המו״מ.</p></li>
+      <li class="step"><span class="step__n">02</span><h3>תמהיל</h3><p>בונה לכם שלושה מסלולים. אתם רואים בדיוק כמה כל אחד עולה — עד השקל.</p></li>
+      <li class="step"><span class="step__n">03</span><h3>מכרז</h3><p>הבנקים מתחרים עליכם, לא להפך. אני מנהל את המו״מ.</p></li>
       <li class="step step--acc"><span class="step__n">04</span><h3>מפתח</h3><p>חותמים על התנאים הכי טובים שאפשר. ואני נשאר זמין גם אחרי.</p></li>
     </ol>
     <div class="road__cta"><a class="btn" href="#contact">בואו נתחיל את שלב 01, ביחד <span class="arr" aria-hidden="true">←</span></a></div>
@@ -130,7 +132,8 @@
 
 <!-- פרק 5 · הסוף הטוב -->
 <section class="end" id="ch-end" aria-labelledby="t-end">
-  <span class="ch-no">פרק 05</span>
+  <div class="chap"><span class="chap__no">05</span><span class="chap__name">הסוף הטוב</span></div>
+  
   <p class="end__num" aria-hidden="true">₪<span id="saveNum">99,000</span></p>
   <h2 id="t-end" class="h2">זה מה שיכול להישאר אצלכם.<br><span>לא אצל הבנק.</span></h2>
   <p class="end__sub">הערכה לפי המספרים שהזנתם בפרק 02, בתמהיל שחוסך 0.4% ריבית בממוצע.</p>
@@ -145,7 +148,8 @@
 <section class="invite" id="contact" aria-labelledby="t-inv">
   <img class="invite__img" src="img/hero.webp" alt="" loading="lazy">
   <div class="invite__in">
-    <span class="ch-no">פרק 06 · שלכם</span>
+    <div class="chap"><span class="chap__no">06</span><span class="chap__name">שלכם</span></div>
+    
     <h2 id="t-inv" class="invite__title">הבית שלכם.<br><em>התנאים שלכם.</em></h2>
     <p class="invite__what">השאירו שם וטלפון, ואיציק יחזור אליכם עוד היום. בשיחה של 20 דקות תדעו אם אפשר לחסוך, ובכמה. בלי התחייבות.</p>
     <form class="form" onsubmit="event.preventDefault();this.classList.add('sent')">
@@ -164,7 +168,6 @@
     <a href="https://wa.me/972500000000">וואטסאפ</a>
     <a href="#">אינסטגרם</a><a href="#">פייסבוק</a>
   </div>
-  <p class="ft__word" aria-hidden="true">דייטש</p>
   <div class="ft__legal">
     <span>© איציק דייטש · עיצוב: מירי דייטש</span>
     <span><a href="../accessibility.html">נגישות</a> · <a href="../privacy.html">פרטיות</a> · <a href="../terms.html">תנאים</a></span>

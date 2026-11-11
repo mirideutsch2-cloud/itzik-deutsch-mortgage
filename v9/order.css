@@ -1,0 +1,68 @@
+/* סדר — מערכת אחידה (2026-11-11, "מרגיש מפוזר ומבולגן")
+   חוקים: גריד 12 אחד · מודול פתיחת פרק אחד · פונט אחד · יישור לקו ימין אחד · מרווח פרק אחד · אין עיטורים חופשיים */
+:root{--chap-pad:clamp(88px, 13vh, 150px);--col-gap:24px}
+
+/* מודול פתיחת פרק — זהה בכל הפרקים */
+.chap{grid-column:1 / -1;display:flex;align-items:baseline;gap:14px;padding-top:16px;border-top:1px solid var(--line);margin-bottom:clamp(36px, 6vh, 64px);font-size:var(--t-micro);color:var(--mute)}
+.chap__no{color:var(--acc);font-weight:700;font-variant-numeric:tabular-nums}
+.bank .chap,.invite .chap,.end .chap{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.75)}
+.bank .chap__no,.invite .chap__no{color:var(--acc-l)}
+.end .chap__no{color:#fff}
+
+/* פונט אחד: הסריף יוצא */
+.me__quote,.q p,.end__scene p,.bank__feel{font-family:var(--f)!important}
+
+/* פרק 01 — הבית: טקסט בימין, תמונה בשמאל, בלי חפיפות */
+.home{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--col-gap);padding:var(--chap-pad) var(--gut);min-height:0;background:#fff}
+.home__img{grid-column:7 / 13;grid-row:2;height:auto;aspect-ratio:4 / 5;max-height:78vh;width:100%;margin:0;border-radius:var(--r);overflow:hidden}
+.home__copy{grid-column:1 / 6;grid-row:2;align-self:end;padding:0}
+
+/* פרק 02 — הבנק */
+.bank__pin{padding-top:clamp(96px, 14vh, 140px);grid-template-rows:auto auto 1fr auto auto}
+.bank__top{max-width:none}
+.bank__after{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--col-gap);row-gap:24px;padding:0 var(--gut) var(--chap-pad);border:0}
+.bank__feel{grid-column:1 / 7;font-size:var(--t-h3)!important;font-weight:200!important;line-height:1.35!important}
+.bank__wait{grid-column:7 / 11;align-self:end}
+.bank__after .btn{grid-column:7 / 13;justify-self:start}
+
+/* פרק 03 — איציק: אותה תבנית כמו פרק 01 (טקסט ימין, תמונה שמאל) */
+.me{grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--col-gap);row-gap:0;padding:var(--chap-pad) var(--gut);background:var(--paper)}
+.me__copy{grid-column:1 / 7;grid-row:2;padding:0;gap:22px}
+.me__quote{font-size:var(--t-h2)!important;font-weight:200!important;line-height:1!important}
+.me__quote em{font-weight:700!important}
+.me__img{grid-column:8 / 13;grid-row:2;margin:0;height:auto;aspect-ratio:4 / 5;max-height:78vh;border-radius:var(--r);align-self:start}
+.me__facts{grid-column:1 / -1;grid-row:3;margin-top:clamp(48px, 8vh, 88px)}
+.me__facts b{font-size:clamp(56px, 6vw, 96px)}
+
+/* פרק 04 — הדרך: כרטיס אחד, היעד באדום */
+.road__pin{padding-top:clamp(88px, 12vh, 120px)}
+.road__head{display:block}
+.road__head .chap{margin-bottom:20px}
+.step{background:var(--paper);color:var(--ink)}
+.step .step__n{color:var(--ink);opacity:.18;font-weight:200}
+.step--acc{background:var(--acc);color:#fff}.step--acc .step__n{color:#fff;opacity:.5}
+
+/* פרק 05 + 06 */
+.end{padding:var(--chap-pad) var(--gut)}
+.end .chap{margin-bottom:0}
+.end__scene p{font-size:var(--t-h3)!important;font-weight:200!important;line-height:1.35!important;max-width:36ch}
+.invite__in{padding:var(--chap-pad) var(--gut) 10vh}
+.invite__in .chap{margin-bottom:12px}
+
+/* פוטר נקי */
+.ft{padding:56px var(--gut) 28px}
+.ft__row{margin-bottom:40px}
+
+@media (max-width: 900px){
+  .home,.me{grid-template-columns:1fr}
+  .home__copy,.me__copy{grid-column:1;grid-row:2}
+  .home__img,.me__img{grid-column:1;grid-row:3;margin-top:32px;max-height:70vh}
+  .me__facts{grid-column:1;grid-row:4}
+  .bank__after{grid-template-columns:1fr}
+  .bank__feel,.bank__wait,.bank__after .btn{grid-column:1}
+}
+.me__copy{grid-column:1 / 8}
+.me__quote{font-size:clamp(36px, 22px + 3vw, 72px)!important;text-wrap:balance}
+.me__quote em{display:inline-block}
+.home .h2,.bank__top .h2,.road__head .h2,.end .h2{text-wrap:balance}
+@media (max-width: 900px){ .form label{flex:0 0 auto} }
