@@ -2,7 +2,7 @@
 """Builds the paid-ads landing pages for Itzik Deutsch.
    index.html = version A, b.html = version B (only the headline differs), thanks.html.
    Run: python3 build.py"""
-import math, pathlib
+import pathlib
 
 HERE = pathlib.Path(__file__).parent
 WA_NUMBER = "972500000000"  # TODO: Itzik's real WhatsApp number
@@ -12,67 +12,6 @@ HEADLINES = {
     "A": "מצאתם דירה ולא בטוחים <em>שתעמדו בהחזר?</em>",
     "B": "מצאתם דירה וכל בנק מציע לכם <em>החזר אחר?</em>",
 }
-
-# ---------- glass house (isometric SVG, computed) ----------
-def house_svg():
-    S, CX, CY = 46, 300, 250
-    def p(x, y, z):
-        return (CX + (x - y) * 0.866 * S, CY + (x + y) * 0.5 * S - z * S)
-    def poly(pts, cls):
-        d = " ".join(f"{a:.1f},{b:.1f}" for a, b in (p(*q) for q in pts))
-        return f'<polygon class="{cls}" points="{d}"/>'
-    def box(x0, x1, y0, y1, z0, z1, cls):
-        top = poly([(x0,y0,z1),(x1,y0,z1),(x1,y1,z1),(x0,y1,z1)], cls+" top")
-        right = poly([(x1,y0,z0),(x1,y1,z0),(x1,y1,z1),(x1,y0,z1)], cls+" side-r")
-        left = poly([(x0,y1,z0),(x1,y1,z0),(x1,y1,z1),(x0,y1,z1)], cls+" side-l")
-        return right + left + top
-    out = []
-    # platform slabs
-    out.append(box(-3.4,3.4,-3.4,3.4,0,.28,"slab s1"))
-    out.append(box(-2.9,2.9,-2.9,2.9,.28,.5,"slab s2"))
-    out.append(box(-2.4,2.4,-2.4,2.4,.5,.62,"slab s3"))
-    # glow ring on top slab
-    out.append(poly([(-2.65,-2.65,.5),(2.65,-2.65,.5),(2.65,2.65,.5),(-2.65,2.65,.5)],"ring"))
-    x0,x1,y0,y1,z0,z1 = -1.7,1.7,-1.25,1.25,.62,2.5
-    zr, ov = 3.75, .22
-    g = ['<g class="house">']
-    # back walls (faint, seen through glass)
-    g.append(poly([(x0,y0,z0),(x1,y0,z0),(x1,y0,z1),(x0,y0,z1)],"wall back"))
-    g.append(poly([(x0,y0,z0),(x0,y1,z0),(x0,y1,z1),(x0,0,zr),(x0,y0,z1)],"wall back"))
-    g.append(poly([(x0,y0,z0),(x1,y0,z0),(x1,y1,z0),(x0,y1,z0)],"floor"))
-    # front walls
-    g.append(poly([(x0,y1,z0),(x1,y1,z0),(x1,y1,z1),(x0,y1,z1)],"wall front-l"))
-    g.append(poly([(x1,y0,z0),(x1,y1,z0),(x1,y1,z1),(x1,0,zr),(x1,y0,z1)],"wall front-r"))
-    # door + windows on left-front wall
-    g.append(poly([(-1.2,y1,z0),(-.5,y1,z0),(-.5,y1,z0+1.3),(-1.2,y1,z0+1.3)],"open"))
-    g.append(poly([(.2,y1,1.3),(1.1,y1,1.3),(1.1,y1,2.05),(.2,y1,2.05)],"open"))
-    # windows on gable wall
-    g.append(poly([(x1,-.75,1.25),(x1,-.05,1.25),(x1,-.05,1.95),(x1,-.75,1.95)],"open"))
-    g.append(poly([(x1,.3,1.25),(x1,.9,1.25),(x1,.9,1.95),(x1,.3,1.95)],"open"))
-    g.append(poly([(x1,-.2,2.65),(x1,.2,2.65),(x1,.2,3.0),(x1,-.2,3.0)],"open small"))
-    # roof
-    g.append(poly([(x0-ov,y0-ov,z1-.15),(x1+ov,y0-ov,z1-.15),(x1+ov,0,zr+.08),(x0-ov,0,zr+.08)],"roof back"))
-    g.append(poly([(x0-ov,0,zr+.08),(x1+ov,0,zr+.08),(x1+ov,y1+ov,z1-.15),(x0-ov,y1+ov,z1-.15)],"roof front"))
-    # skylight on front roof plane
-    def rp(x, t):  # point on front roof plane, t in [0..1] from ridge to eave
-        return (x, t*(y1+ov), (zr+.08) - t*((zr+.08)-(z1-.15)))
-    g.append(poly([rp(-.9,.25),rp(.1,.25),rp(.1,.7),rp(-.9,.7)],"skylight"))
-    # ridge highlight
-    a, b = p(x0-ov,0,zr+.08), p(x1+ov,0,zr+.08)
-    g.append(f'<line class="ridge" x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}"/>')
-    g.append("</g>")
-    return f'''<svg class="glass-house" viewBox="0 0 600 470" aria-hidden="true">
-<defs>
- <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd0ff" stop-opacity=".30"/><stop offset="1" stop-color="#2f6be0" stop-opacity=".06"/></linearGradient>
- <linearGradient id="gRoof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6ff" stop-opacity=".42"/><stop offset="1" stop-color="#3b7bea" stop-opacity=".10"/></linearGradient>
- <linearGradient id="gSlab" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#16285a"/><stop offset="1" stop-color="#0b1434"/></linearGradient>
- <filter id="fGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
- <filter id="fSoft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-</defs>
-<ellipse class="floor-glow" cx="300" cy="300" rx="270" ry="120"/>
-{"".join(out)}
-{"".join(g)}
-</svg>'''
 
 # ---------- shared partials ----------
 def form(fid, variant):
@@ -200,7 +139,7 @@ def landing(variant):
       <p class="lede">לפני שחותמים על החוזה, כדאי לדעת בוודאות איזה החזר חודשי תוכלו לעמוד בו לאורך זמן.</p>
       <p>אני איציק דייטש, יועץ משכנתאות. את הבדיקה הזאת אני עושה איתכם, ולאחר מכן משווה עבורכם בין הצעות כל הבנקים עד שנגיע למסלול המתאים לכם ביותר. <b>ואם זה לא העיתוי הנכון, אמליץ לכם לחכות.</b></p>
     </div>
-    <div class="hero__visual">{house_svg()}</div>
+    <div class="hero__visual"><img class="glass-house" src="img/glass-house.webp" alt="" width="1024" height="1024" fetchpriority="high"></div>
     <div class="hero__form glass glass--lit">
       <h2 class="form-title"><span>1</span>בדיקת החזר לפני החתימה</h2>
       {form("lead-hero", variant)}

@@ -87,22 +87,7 @@ p{margin:0 0 1em}
 .form-title span{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:rgba(59,130,255,.18);color:var(--blue-2);font-size:.95rem;border:1px solid rgba(90,168,255,.35)}
 
 /* glass house */
-.glass-house{width:100%;height:auto;overflow:visible;animation:float 7s ease-in-out infinite}
-.floor-glow{fill:rgba(40,130,255,.22);filter:blur(30px)}
-.slab{stroke:rgba(120,180,255,.35);stroke-width:1}
-.slab.top{fill:#0e1a44}.slab.side-r{fill:#08112c}.slab.side-l{fill:#0b1638}
-.s1.side-r,.s1.side-l{stroke:#3da0ff;stroke-width:2;filter:url(#fGlow)}
-.s3.top{fill:rgba(40,90,200,.25)}
-.ring{fill:none;stroke:#46a8ff;stroke-width:3;filter:url(#fGlow);animation:pulse 3.6s ease-in-out infinite}
-.house polygon{stroke:rgba(190,225,255,.75);stroke-width:1.3;stroke-linejoin:round;filter:url(#fSoft)}
-.wall{fill:url(#gGlass)}
-.wall.back{fill:rgba(120,170,255,.05);stroke:rgba(160,200,255,.28)}
-.floor{fill:rgba(70,140,255,.18);stroke:rgba(110,180,255,.4)}
-.roof{fill:url(#gRoof)}
-.roof.back{fill:rgba(140,190,255,.10)}
-.open{fill:rgba(6,12,34,.55);stroke:rgba(200,230,255,.9)!important}
-.skylight{fill:rgba(170,215,255,.35);stroke:#e6f3ff!important}
-.ridge{stroke:#eaf5ff;stroke-width:2;filter:url(#fGlow)}
+.glass-house{width:100%;height:auto;mix-blend-mode:screen;-webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent 100%);mask-image:radial-gradient(closest-side,#000 72%,transparent 100%);animation:float 7s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-10px)}}
 @keyframes pulse{50%{opacity:.55}}
 
