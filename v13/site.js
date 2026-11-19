@@ -29,7 +29,7 @@
   /* reveals */
   document.querySelectorAll('.sec .h1, .pull').forEach(h => h.querySelectorAll('.ln').forEach(l => l.classList.add('rv-ln')));
   document.querySelectorAll('.problem__copy, .guide__copy > p, .cases, .trust__copy > p, .facts, .calc__card, .calc__out, .calc__cta, .late__grid > p, .final__copy > p, .final .card, .final__key, .ledger').forEach(e => e.classList.add('up'));
-  const targets = document.querySelectorAll('.rv-ln, .up, .neon--v, .big-dia, .guide__photo, .road, .order, .ledger');
+  const targets = document.querySelectorAll('.rv-ln, .up, .neon--v, .big-dia, .guide__photo, .road, .order, .paths, .ledger');
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { threshold: .2, rootMargin: '0px 0px -6% 0px' });

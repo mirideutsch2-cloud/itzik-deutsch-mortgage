@@ -174,10 +174,10 @@ def landing(v):
 <!-- 3 · המדריך -->
 <section class="guide sec" id="guide">
   <div class="wrap guide__grid">
-    <figure class="guide__photo"><span class="guide__dia" aria-hidden="true"></span><img src="img/itzik-cut.webp" alt="איציק דייטש, יועץ משכנתאות" width="520" height="640" loading="lazy"><figcaption class="glass">איציק דייטש<span>יועץ משכנתאות · 4 שנים בתחום</span></figcaption></figure>
+    <figure class="guide__photo"><span class="guide__dia" aria-hidden="true"></span><img src="img/itzik-cut.webp" alt="איציק דייטש, יועץ משכנתאות" width="520" height="640" loading="lazy"><figcaption class="tag"><i class="tag__dia"></i><b>איציק דייטש</b><span>יועץ משכנתאות · 4 שנים בתחום</span></figcaption></figure>
     <div class="guide__copy">
       {chapter("איציק")}
-      <h2 class="h1">{lines("לפעמים התשובה הנכונה", "היא <em>״עוד לא״</em>")}</h2>
+      <h2 class="h1">{lines("לפעמים התשובה הנכונה", 'היא <em class="red">״עוד לא״</em>')}</h2>
       <p>כואב לי לראות זוגות שחותמים על דירה, ורק אחרי החתימה מגלים שההחזר החודשי לא משאיר להם מרווח לנשום. לכן, כבר ארבע שנים, אני מתחיל כל ליווי עוד לפני הבנק. אני בודק איתכם את ההכנסות, ההוצאות והתוכניות שלכם, ורק אחר כך מחפש את המסלול.</p>
       <div class="cases">
         <article class="case glass"><span class="case__tag">ירושלים · מחיר למשתכן</span><p>לקוח אחד שלי חשש לקחת משכנתא על דירה במחיר למשתכן בירושלים. ישבנו יחד על המספרים, עד שהיה לו ברור איך ההחזר מסתדר.</p></article>
@@ -224,9 +224,23 @@ def landing(v):
     <h2 class="h1">{lines("חותמים קודם,", '<em class="red">בודקים אחר כך</em>')}</h2>
     <div class="late__grid">
       <p>מי שחותם על דירה ורק אז מתחיל לבדוק משכנתא, בודק אחרי שכבר התחייב. אם הבנק מאשר פחות ממה שתכננתם, צריך למצוא את ההפרש ממקור אחר. ואם ההחזר החודשי יוצא גבוה מדי, כבר אי אפשר לוותר על העסקה בלי לשלם על כך, ואז נשארים עם החזר כבד לשנים ארוכות.</p>
-      <div class="order">
-        <div class="order__row order__row--bad glass"><span>חתימה</span><i></i><span>בדיקה</span><i></i><span>החזר כבד לשנים</span></div>
-        <div class="order__row order__row--good glass"><span>בדיקה</span><i></i><span>מסלול</span><i></i><span>חתימה בשקט</span></div>
+      <div class="paths">
+        <article class="path path--bad">
+          <p class="path__tag">כשבודקים אחרי החתימה</p>
+          <ol class="path__list">
+            <li><span class="path__n">1</span>חותמים על החוזה</li>
+            <li><span class="path__n">2</span>רק אז בודקים משכנתא</li>
+            <li class="path__end"><span class="path__n"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M12 12l16 16M28 12L12 28"/></svg></span>מגלים שההחזר כבד מדי, וכבר אי אפשר לחזור בלי לשלם</li>
+          </ol>
+        </article>
+        <article class="path path--good">
+          <p class="path__tag">כשבודקים לפני החתימה</p>
+          <ol class="path__list">
+            <li><span class="path__n">1</span>בודקים איזה החזר מתאים לכם</li>
+            <li><span class="path__n">2</span>בוחרים מסלול מול כל הבנקים</li>
+            <li class="path__end"><span class="path__n"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M11 21l6 6 12-14"/></svg></span>חותמים בשקט, ויודעים כמה תשלמו</li>
+          </ol>
+        </article>
       </div>
     </div>
   </div>
