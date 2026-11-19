@@ -368,3 +368,70 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radiu
   .js .guide__dia{transform:rotate(45deg) scale(.82)!important}
   .ledger s{background-size:100% 2px}
 }
+
+/* ===== mobile: centred + bigger (her ask) ===== */
+@media (max-width:860px){
+  :root{--fs-display:clamp(3.8rem,17vw,6.4rem);--fs-1:clamp(3rem,13vw,4.8rem);--fs-2:1.5rem;--fs-body:1.1875rem;--fs-small:1.0625rem}
+  body{font-size:var(--fs-body);line-height:1.65}
+  .hero__copy,.sec .wrap,.trust__copy,.final__copy,.guide__grid,.calc__out,.calc__cta,.late__grid{text-align:center}
+  .ch{justify-content:center;font-size:1.0625rem}
+  .h1,.display,.pull,.problem .h1{margin-inline:auto;max-width:none}
+  .lede{font-size:1.5rem;max-width:none;margin-inline:auto}
+  .hero__p,.problem__copy p,.guide__copy>p,.trust__copy>p,.late__grid>p,.final__copy>p{margin-inline:auto;font-size:1.1875rem}
+  .guide__grid>p{text-align:center}
+  /* form card */
+  .card{text-align:center;padding:24px 18px 18px}
+  .card__title{font-size:1.25rem}
+  .yn{flex-direction:column;align-items:stretch;gap:12px}
+  .yn legend{float:none;width:100%;text-align:center;margin-bottom:12px}
+  .card__step legend,.card__label{font-size:1.1875rem}
+  .chips span{min-height:56px;font-size:1.1875rem}
+  .field input{min-height:60px;font-size:1.1875rem;text-align:center}
+  .field input[dir=ltr]{text-align:center}
+  .btn{min-height:62px;font-size:1.1875rem}
+  .lead__note{font-size:1rem}
+  .chips-u li{font-size:1rem}
+  /* problem ledger */
+  .ledger__col{text-align:center}
+  .ledger p{justify-content:center;font-size:1.125rem}
+  .ledger h3{font-size:1.5rem}
+  .pull{font-size:var(--fs-1)}
+  /* guide */
+  .case{text-align:center}
+  .case p{font-size:1.125rem}
+  .case__tag{font-size:1.0625rem}
+  .guide__photo figcaption{inset-inline:0;margin-inline:auto;width:max-content;max-width:90%;text-align:center}
+  /* trust */
+  .fact{text-align:center}
+  .fact b{font-size:1.25rem}
+  .fact span{font-size:1.0625rem}
+  .big-dia{max-width:270px}
+  .big-dia__num{font-size:7.5rem}
+  /* steps: centred stack, line through the middle */
+  .road::before{display:none!important}
+  .road__step:not(:last-child)::after{content:"";display:block;width:2px;height:34px;margin-top:18px;background:var(--neon);box-shadow:0 0 10px var(--neon)}
+  .road__step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 0 18px;position:relative}
+  .road__dia{margin:0 auto 14px;width:52px;height:52px;position:relative;z-index:1}
+  .road__step h3,.road__step p{max-width:32ch}
+  .road__step h3{font-size:1.5rem;margin:0 0 6px}
+  .road__step p{font-size:1.125rem}
+  /* calculator */
+  .calc__card{text-align:center}
+  .rng__label{font-size:1.1875rem}
+  .bubble{font-size:1.125rem}
+  .pm{width:52px;height:52px}
+  .calc__label{font-size:1.125rem}
+  .calc__num{justify-content:center;font-size:clamp(7rem,34vw,11rem)}
+  .calc__fine{font-size:1rem}
+  .calc__cta .h2{font-size:1.75rem}
+  /* too late */
+  .order__row{justify-content:center;font-size:1.0625rem}
+  .order__row span:last-child{font-size:1.0625rem}
+  /* footer */
+  .ft__in{flex-direction:column;text-align:center}
+  .ft__links{justify-content:center}
+}
+@media (max-width:400px){
+  .order__row{flex-wrap:wrap;row-gap:8px}
+  .order__row i{min-width:20px}
+}
