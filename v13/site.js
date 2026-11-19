@@ -60,13 +60,16 @@
       };
       raf = requestAnimationFrame(tick);
     };
-    const calc = () => {
-      const P = +amount.value, n = +years.value * 12, r = +rate.value / 100 / 12;
-      const pay = r ? P * r / (1 - Math.pow(1 + r, -n)) : P / n;
-      $('o-amount').textContent = '₪' + nf.format(P);
+    const labels = () => {
+      $('o-amount').textContent = '₪' + nf.format(+amount.value);
       $('o-years').textContent = years.value + ' שנים';
       $('o-rate').textContent = (+rate.value).toFixed(1) + '%';
       [amount, years, rate].forEach(fill);
+    };
+    const calc = () => {
+      const P = +amount.value, n = +years.value * 12, r = +rate.value / 100 / 12;
+      const pay = r ? P * r / (1 - Math.pow(1 + r, -n)) : P / n;
+      labels();
       show(Math.round(pay));
     };
     [amount, years, rate].forEach(r => r.addEventListener('input', calc));
@@ -78,7 +81,7 @@
     }));
     /* count up the first time the calculator is seen */
     const calcIo = new IntersectionObserver(es => { if (es[0].isIntersecting) { calc(); calcIo.disconnect(); } }, { threshold: .3 });
-    [amount, years, rate].forEach(fill);
+    labels();
     calcIo.observe(out);
   }
 
